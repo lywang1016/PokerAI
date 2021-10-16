@@ -17,7 +17,7 @@ class Card(object):
         else:
             val = self.value
 
-        return "{} of {}".format(val, self.suit)
+        print("{} of {}".format(val, self.suit)) 
 
 
 class Deck(object):
@@ -28,7 +28,7 @@ class Deck(object):
     # Display all cards in the deck
     def show(self):
         for card in self.cards:
-            print card.show()
+            card.show()
 
     # Generate 52 cards
     def build(self):
@@ -42,6 +42,17 @@ class Deck(object):
         random.shuffle(self.cards)
 
     # Return the top card
-    def deal(self):
+    def draw(self):
         return self.cards.pop()
       
+# card = Card('Spades', 12)
+# card.show()
+myDeck = Deck()
+# myDeck.shuffle()
+myDeck.show()
+
+print('----------------')
+card = myDeck.draw()
+card.show()
+print('----------------')
+myDeck.show()
