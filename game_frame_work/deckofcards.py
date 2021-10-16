@@ -44,15 +44,17 @@ class Deck(object):
     # Return the top card
     def draw(self):
         return self.cards.pop()
-      
-# card = Card('Spades', 12)
-# card.show()
-myDeck = Deck()
-# myDeck.shuffle()
-myDeck.show()
 
-print('----------------')
-card = myDeck.draw()
-card.show()
-print('----------------')
-myDeck.show()
+
+if __name__ == '__main__':   
+    # card = Card('Spades', 12)
+    # card.show()
+    myDeck = Deck()
+    # myDeck.shuffle()
+    myDeck.show()
+
+    print('----------------')
+    card = myDeck.draw()
+    card.show()
+    print('----------------')
+    myDeck.show()
