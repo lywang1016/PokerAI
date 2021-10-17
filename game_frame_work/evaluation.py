@@ -1,6 +1,6 @@
 from deckofcards import Card, Deck
 
-class FinalEvaluation(object):
+class Evaluation(object):
     def __init__(self, cards7):
         self.cards = cards7
         self.all_possible = []
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     card.show()
     cards.append(card)
 
-    evaluate = FinalEvaluation(cards)
+    evaluate = Evaluation(cards)
     # print(evaluate.if_flush(evaluate.cards))
     # print(evaluate.if_straight(evaluate.cards))
     # print(evaluate.if_three_of_a_kind(evaluate.cards))
