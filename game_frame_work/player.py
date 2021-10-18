@@ -17,11 +17,23 @@ class Player(object):
         self.other_players = []
         self.others_actions = {}
         self.my_actions = []
+        self.status = 0
+        self.seat_num = -1
+        self.join = 0
         self.action_def = {0:"Fold",
                            1:"Check/Call",
                            2:"Raise"}
         self.__hand = []
         self.__all_cards = []
+
+    def join_game_application(self):
+        self.say_hello()
+        self.show_chips()
+        self.join = 1
+        return self.name, self.chips
+    
+    def leave_game_application(self):
+        self.join = 0
 
     def say_hello(self):
         print("Hi my name is " + self.name)
@@ -43,10 +55,13 @@ class Player(object):
     
     def set_your_position(self, position):
         self.position = position
-        if position == 0:
+        if position == 'SB' or position == 'SBB':
             self.chips -= self.sb
-        if position == 1:
+            return self.sb
+        if position == 'BB':
             self.chips -= self.bb
+            return self.bb
+        return 0
 
     def other_players_info(self, players):
         self.other_players = players
@@ -63,15 +78,17 @@ class Player(object):
     def win_pot(self):
         self.chips += self.pot_size
         self.pot_size = 0
+        self.status = 0
 
     def show_best_hand(self):
-        evaluate = Evaluation(self.__all_cards)
-        evaluate.get_best_hand()
-        print("My card power is: " + evaluate.power_info[evaluate.max_power])
-        print("My best hand is:")
-        for card in evaluate.best_hand:
-            card.show()
-        return evaluate.best_hand
+        if len(self.__all_cards) == 7:
+            evaluate = Evaluation(self.__all_cards)
+            evaluate.get_best_hand()
+            print("My card power is: " + evaluate.power_info[evaluate.max_power])
+            print("My best hand is:")
+            for card in evaluate.best_hand:
+                card.show()
+            return evaluate.best_hand
     
     def your_action(self, chips_to_call, min_raise):
         self.chips_to_call = chips_to_call
@@ -86,6 +103,7 @@ class Player(object):
         if len(self.__hand) < 2:
             self.__hand.append(card)
             self.__all_cards.append(card)
+            self.status = 1
 
     def get_flop(self, cards):
         self.flop = cards
@@ -103,21 +121,25 @@ class Player(object):
     def __fold(self):
         self.__hand = []
         self.my_actions.append([0, 0])
+        self.status = 0
         return [0, 0]
     
     def __check(self):
         self.my_actions.append([1, 0])
+        self.status = 1
         return [1, 0]
 
     def __call(self):
         self.chips -= self.chips_to_call
         self.my_actions.append([1, self.chips_to_call])
+        self.status = 1
         return [1, self.chips_to_call]
 
     def __raise(self):
         raise_num = self.min_raise
         self.chips -= raise_num
         self.my_actions.append(2, raise_num)
+        self.status = 1
         return [2, raise_num]
 
 if __name__ == '__main__': 
