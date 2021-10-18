@@ -10,7 +10,6 @@ class Croupier(object):
         self.button_idx = 0
         self.player_queue = []
         self.deck = None
-        self.open_table()
 
     def open_table(self, table_size):
         self.table_size = table_size
@@ -84,20 +83,24 @@ class Croupier(object):
         self.prepare_deck()
         b_idx, sb_idx, bb_idx = self.asign_player_position()
         player_cards = {}
+        bfo = []    # before flop action order
+        afo = []    # after flop action order
         if b_idx == sb_idx: # 2 players
+            sbb_name = self.player_queue[sb_idx]
+            bb_name = self.player_queue[bb_idx]
+            bfo = [sbb_name, bb_name]
+            afo = [bb_name, sbb_name]
             for deal_round in range(2):
                 card = self.deck.draw()
-                sbb_name = self.player_queue[sb_idx]
                 if sbb_name not in player_cards:
-                    player_card[sbb_name] = [card]
+                    player_cards[sbb_name] = [card]
                 else:
-                    player_card[sbb_name].append(card)
+                    player_cards[sbb_name].append(card)
                 card = self.deck.draw()
-                bb_name = self.player_queue[bb_idx]
                 if bb_name not in player_cards:
-                    player_card[bb_name] = [card]
+                    player_cards[bb_name] = [card]
                 else:
-                    player_card[bb_name].append(card)
+                    player_cards[bb_name].append(card)
         else:
             for deal_round in range(2):
                 for i in range(sb_idx, sb_idx+self.current_player_num):
@@ -105,12 +108,18 @@ class Croupier(object):
                     if idx > self.current_player_num-1:
                         idx -= self.current_player_num
                     name = self.player_queue[idx]
+                    if deal_round == 0:
+                        afo.append(name)
                     card = self.deck.draw()
                     if name not in player_cards:
-                        player_card[name] = [card]
+                        player_cards[name] = [card]
                     else:
-                        player_card[name].append(card)  
-        return player_cards
+                        player_cards[name].append(card)  
+            for i in range(len(afo)-2):
+                bfo.append(afo[i+2])
+            bfo.append(afo[0])
+            bfo.append(afo[1])
+        return player_cards, bfo, afo
 
     def burn_card(self):
         card = self.deck.draw()

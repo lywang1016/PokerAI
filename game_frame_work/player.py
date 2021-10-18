@@ -2,7 +2,7 @@ from deckofcards import Card, Deck
 from evaluation import Evaluation
 
 class Player(object):
-    def __init__(self, name, chips):
+    def __init__(self, name, chips, is_ai):
         self.name = name
         self.chips = chips
         self.flop = []
@@ -20,17 +20,23 @@ class Player(object):
         self.status = 0
         self.seat_num = -1
         self.join = 0
+        self.is_ai = is_ai
         self.action_def = {0:"Fold",
                            1:"Check/Call",
                            2:"Raise"}
         self.__hand = []
         self.__all_cards = []
-
-    def join_game_application(self):
+    
+    def print_player_info(self):
         self.say_hello()
         self.show_chips()
+        self.show_hand()
+        print(self.name + "'s position is: " + str(self.position))
+        print(self.name + "'s seat number is: " + str(self.seat_num))
+        print(self.name + "'s status is: " + str(self.status))
+
+    def join_game_application(self):
         self.join = 1
-        return self.name, self.chips
     
     def leave_game_application(self):
         self.join = 0
@@ -40,25 +46,25 @@ class Player(object):
         return self.name
 
     def show_hand(self):
-        print("My hand cards are:")
+        print(self.name + "'s hand cards are:")
         for card in self.__hand:
             card.show()
         return self.__hand
     
     def show_chips(self):
-        print("I have " + str(self.chips) + " chips")
+        print(self.name + " have " + str(self.chips) + " chips")
         return self.chips
 
     def set_game_size(self, game_size):
         self.sb = game_size[0]
-        self.bb = game_size[0]
+        self.bb = game_size[1]
     
     def set_your_position(self, position):
         self.position = position
-        if position == 'SB' or position == 'SBB':
+        if position == 0:
             self.chips -= self.sb
             return self.sb
-        if position == 'BB':
+        if position == 1:
             self.chips -= self.bb
             return self.bb
         return 0
@@ -94,10 +100,24 @@ class Player(object):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
 
-        if self.chips_to_call = 0:
-            return self.__check()
-        else:
-            return self.__call()
+        if self.is_ai: # AI player
+            if self.chips_to_call == 0:
+                return self.__check()
+            else:
+                return self.__call()
+        else: # Human player
+            # print("Pick actions: 0 for fold, 1 for check/call, 2 for raise")
+            action = int(input("Pick actions: 0 for fold, 1 for check/call, 2 for raise: "))
+            if action == 0:
+                return self.__fold()
+            if action == 1:
+                if self.chips_to_call == 0:
+                    return self.__check()
+                else:
+                    return self.__call()
+            if action == 2:
+                chips_raise = int(input("Input chips to raise: "))
+                return self.__raise(chips_raise)
 
     def get_1_card(self, card):
         if len(self.__hand) < 2:
@@ -122,24 +142,41 @@ class Player(object):
         self.__hand = []
         self.my_actions.append([0, 0])
         self.status = 0
+        print(self.name + " Fold")
         return [0, 0]
     
     def __check(self):
         self.my_actions.append([1, 0])
         self.status = 1
+        print(self.name + " Check")
         return [1, 0]
 
     def __call(self):
-        self.chips -= self.chips_to_call
-        self.my_actions.append([1, self.chips_to_call])
-        self.status = 1
-        return [1, self.chips_to_call]
+        if self.chips >= self.chips_to_call:
+            self.chips -= self.chips_to_call
+            self.my_actions.append([1, self.chips_to_call])
+            self.status = 1
+            print(self.name + " Call " + str(self.chips_to_call) + " chips")
+            return [1, self.chips_to_call]
+        else:
+            call_chips = self.chips
+            self.chips = 0
+            self.my_actions.append([1, call_chips])
+            self.status = 1
+            print(self.name + " Call " + str(call_chips) + " chips")
+            return [1, call_chips]
 
-    def __raise(self):
-        raise_num = self.min_raise
-        self.chips -= raise_num
-        self.my_actions.append(2, raise_num)
+    def __raise(self, raise_num):
+        if raise_num < self.min_raise:
+            raise_num = self.min_raise
+        if self.chips >= raise_num:
+            self.chips -= raise_num
+        else:
+            raise_num = self.chips
+            self.chips = 0
+        self.my_actions.append([2, raise_num])
         self.status = 1
+        print(self.name + " Raise " + str(raise_num) + " chips")
         return [2, raise_num]
 
 if __name__ == '__main__': 
