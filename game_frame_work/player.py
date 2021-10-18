@@ -11,12 +11,9 @@ class Player(object):
         self.position = None
         self.sb = 0
         self.bb = 0
-        self.pot_size = 0
+        self.round_bet = 0
         self.chips_to_call = 0
         self.min_raise = 0
-        self.other_players = []
-        self.others_actions = {}
-        self.my_actions = []
         self.status = 0
         self.seat_num = -1
         self.join = 0
@@ -63,28 +60,18 @@ class Player(object):
         self.position = position
         if position == 0:
             self.chips -= self.sb
+            self.round_bet += self.sb
             return self.sb
         if position == 1:
             self.chips -= self.bb
+            self.round_bet += self.bb
             return self.bb
         return 0
 
-    def other_players_info(self, players):
-        self.other_players = players
-        self.my_actions = []
-        self.others_actions = {}
-        for player in players:
-            if player.position not in self.others_actions:
-                self.others_actions[player.position] = []
-
-    def last_others_action(self, position, action, chips):
-        self.pot_size += chips
-        self.others_actions[position].append([action, chips])
-
-    def win_pot(self):
-        self.chips += self.pot_size
-        self.pot_size = 0
+    def win_pot(self, pot_size):
+        self.chips += pot_size
         self.status = 0
+        self.round_bet = 0
 
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
@@ -127,43 +114,45 @@ class Player(object):
 
     def get_flop(self, cards):
         self.flop = cards
+        self.round_bet = 0
         for card in cards:
             self.__all_cards.append(card)
 
     def get_turn(self, card):
         self.turn = card
+        self.round_bet = 0
         self.__all_cards.append(card)
     
     def get_river(self, card):
         self.river = card
+        self.round_bet = 0
         self.__all_cards.append(card)
 
     def __fold(self):
         self.__hand = []
-        self.my_actions.append([0, 0])
         self.status = 0
-        print(self.name + " Fold")
+        # print(self.name + " Fold")
+        self.round_bet = 0
         return [0, 0]
     
     def __check(self):
-        self.my_actions.append([1, 0])
         self.status = 1
-        print(self.name + " Check")
+        # print(self.name + " Check")
         return [1, 0]
 
     def __call(self):
         if self.chips >= self.chips_to_call:
             self.chips -= self.chips_to_call
-            self.my_actions.append([1, self.chips_to_call])
             self.status = 1
-            print(self.name + " Call " + str(self.chips_to_call) + " chips")
+            # print(self.name + " Call " + str(self.chips_to_call) + " chips")
+            self.round_bet += self.chips_to_call
             return [1, self.chips_to_call]
         else:
             call_chips = self.chips
             self.chips = 0
-            self.my_actions.append([1, call_chips])
             self.status = 1
-            print(self.name + " Call " + str(call_chips) + " chips")
+            # print(self.name + " Call " + str(call_chips) + " chips")
+            self.round_bet += call_chips
             return [1, call_chips]
 
     def __raise(self, raise_num):
@@ -174,9 +163,9 @@ class Player(object):
         else:
             raise_num = self.chips
             self.chips = 0
-        self.my_actions.append([2, raise_num])
         self.status = 1
-        print(self.name + " Raise " + str(raise_num) + " chips")
+        # print(self.name + " Raise " + str(raise_num) + " chips")
+        self.round_bet += raise_num
         return [2, raise_num]
 
 if __name__ == '__main__': 
