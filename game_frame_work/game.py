@@ -152,8 +152,9 @@ if __name__ == '__main__':
                 action_idx = 0
 
     
-    for log in log_before_flop:
-        log.print_log()
+    # for log in log_before_flop:
+    #     log.print_log()
+    # print("pot has: " + str(pot))
     
 
 

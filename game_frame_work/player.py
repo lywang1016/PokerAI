@@ -103,7 +103,7 @@ class Player(object):
                 else:
                     return self.__call()
             if action == 2:
-                chips_raise = int(input("Input chips to raise: "))
+                chips_raise = int(input("Min raise is: " + str(self.min_raise) + " Input chips to raise: "))
                 return self.__raise(chips_raise)
 
     def get_1_card(self, card):
