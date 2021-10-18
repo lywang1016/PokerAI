@@ -6,7 +6,7 @@ class Card(object):
         self.value = val
         
     def show(self):
-        if self.value == 1:
+        if self.value == 1 or self.value == 14:
             val = "Ace"
         elif self.value == 11:
             val = "Jack"
@@ -17,7 +17,7 @@ class Card(object):
         else:
             val = self.value
 
-        print("{} of {}".format(val, self.suit)) 
+        print("\t{} of {}".format(val, self.suit)) 
 
 
 class Deck(object):
