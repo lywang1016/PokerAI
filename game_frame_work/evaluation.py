@@ -33,35 +33,38 @@ class Evaluation(object):
         self.get_max_power_hands()
 
         nums = len(self.max_power_hands)
-        self.best_hand = self.max_power_hands[0]
+        self.best_hand = [self.max_power_hands[0]]
         if nums > 1:
             if self.max_power == 8:
                 for i in range(1, nums):
-                    self.best_hand = self.flush_and_straight_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.flush_and_straight_compare(self.best_hand[0], self.max_power_hands[i]) 
+                if len(self.best_hand) == 2:
+                    if self.best_hand[0] == self.best_hand[1]:
+                        self.best_hand.pop()
             if self.max_power == 7:
                 for i in range(1, nums):
-                    self.best_hand = self.four_of_a_kind_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.four_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 6:
                 for i in range(1, nums):
-                    self.best_hand = self.full_house_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.full_house_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 5:
                 for i in range(1, nums):
-                    self.best_hand = self.flush_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.flush_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 4:
                 for i in range(1, nums):
-                    self.best_hand = self.straight_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.straight_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 3:
                 for i in range(1, nums):
-                    self.best_hand = self.three_of_a_kind_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.three_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 2:
                 for i in range(1, nums):
-                    self.best_hand = self.two_pairs_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.two_pairs_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 1:
                 for i in range(1, nums):
-                    self.best_hand = self.one_pair_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.one_pair_compare(self.best_hand[0], self.max_power_hands[i])
             if self.max_power == 0:
                 for i in range(1, nums):
-                    self.best_hand = self.high_card_compare(self.best_hand, self.max_power_hands[i])
+                    self.best_hand = self.high_card_compare(self.best_hand[0], self.max_power_hands[i])
     
     def get_max_power_hands(self):
         power_dict = {8:[], 7:[], 6:[], 5:[], 4:[], 3:[], 2:[], 1:[], 0:[]}
@@ -239,10 +242,10 @@ class Evaluation(object):
             card1 = hand1[i]
             card2 = hand2[i]
             if card1.value > card2.value:
-                return hand1
+                return [hand1]
             if card1.value < card2.value:
-                return hand2
-        return hand1
+                return [hand2]
+        return [hand1, hand2]
 
     def one_pair_compare(self, hand1, hand2):
         self.hand_sort(hand1)
@@ -258,9 +261,9 @@ class Evaluation(object):
         pair_idxs2 = find_pair(hand2)
 
         if hand1[pair_idxs1[0]].value > hand2[pair_idxs2[0]].value:
-            return hand1
+            return [hand1]
         if hand1[pair_idxs1[0]].value < hand2[pair_idxs2[0]].value:
-            return hand2
+            return [hand2]
         
         hand1_left = []
         hand2_left = []
@@ -273,10 +276,10 @@ class Evaluation(object):
             card1 = hand1_left[i]
             card2 = hand2_left[i]
             if card1.value > card2.value:
-                return hand1
+                return [hand1]
             if card1.value < card2.value:
-                return hand2
-        return hand1
+                return [hand2]
+        return [hand1, hand2]
 
     def two_pairs_compare(self, hand1, hand2):
         self.hand_sort(hand1)
@@ -293,14 +296,14 @@ class Evaluation(object):
         pair_idxs2 = find_pairs(hand2)
 
         if hand1[pair_idxs1[1][0]].value > hand2[pair_idxs2[1][0]].value:
-            return hand1
+            return [hand1]
         if hand1[pair_idxs1[1][0]].value < hand2[pair_idxs2[1][0]].value:
-            return hand2
+            return [hand2]
 
         if hand1[pair_idxs1[0][0]].value > hand2[pair_idxs2[0][0]].value:
-            return hand1
+            return [hand1]
         if hand1[pair_idxs1[0][0]].value < hand2[pair_idxs2[0][0]].value:
-            return hand2
+            return [hand2]
 
         hand1_used_idx = []
         hand2_used_idx = []
@@ -314,10 +317,10 @@ class Evaluation(object):
             if i not in hand2_used_idx:
                 card2 = hand2[i]
         if card1.value > card2.value:
-            return hand1
+            return [hand1]
         if card1.value < card2.value:
-            return hand2
-        return hand1
+            return [hand2]
+        return [hand1, hand2]
 
     def three_of_a_kind_compare(self, hand1, hand2):
         self.hand_sort(hand1)
@@ -333,9 +336,9 @@ class Evaluation(object):
         three_idxs2 = find_three(hand2)
 
         if hand1[three_idxs1[0]].value > hand2[three_idxs2[0]].value:
-            return hand1
+            return [hand1]
         if hand1[three_idxs1[0]].value < hand2[three_idxs2[0]].value:
-            return hand2
+            return [hand2]
         
         hand1_left = []
         hand2_left = []
@@ -348,10 +351,10 @@ class Evaluation(object):
             card1 = hand1_left[i]
             card2 = hand2_left[i]
             if card1.value > card2.value:
-                return hand1
+                return [hand1]
             if card1.value < card2.value:
-                return hand2
-        return hand1
+                return [hand2]
+        return [hand1, hand2]
 
     def straight_compare(self, hand1, hand2):
         self.hand_sort(hand1)
@@ -370,9 +373,9 @@ class Evaluation(object):
                 max2 = 5
 
         if max1 > max2:
-            return hand1
+            return [hand1]
         else:
-            return hand2
+            return [hand2]
 
     def flush_compare(self, hand1, hand2):
         return self.high_card_compare(hand1, hand2)
@@ -394,22 +397,20 @@ class Evaluation(object):
         four_idxs2 = find_four(hand2)
 
         if hand1[four_idxs1[0]].value > hand2[four_idxs2[0]].value:
-            return hand1
+            return [hand1]
         if hand1[four_idxs1[0]].value < hand2[four_idxs2[0]].value:
-            return hand2
+            return [hand2]
 
-        hand1_left = []
-        hand2_left = []
         for i in range(5):
             if i not in four_idxs1:
                 card1 = hand1[i]
             if i not in four_idxs2:
                 card2 = hand2[i]
         if card1.value > card2.value:
-            return hand1
+            return [hand1]
         if card1.value < card2.value:
-            return hand2
-        return hand1
+            return [hand2]
+        return [hand1, hand2]
 
     def flush_and_straight_compare(self, hand1, hand2):
         return self.straight_compare(hand1, hand2)

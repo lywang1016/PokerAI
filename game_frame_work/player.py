@@ -81,9 +81,9 @@ class Player(object):
             evaluate.get_best_hand()
             print(self.name + "'s card power is: " + evaluate.power_info[evaluate.max_power])
             print(self.name + "'s best hand is:")
-            for card in evaluate.best_hand:
+            for card in evaluate.best_hand[0]:
                 card.show()
-            return evaluate.best_hand
+            return evaluate.best_hand[0]
     
     def your_action(self, chips_to_call, min_raise):
         self.chips_to_call = chips_to_call
