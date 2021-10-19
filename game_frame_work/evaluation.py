@@ -37,34 +37,67 @@ class Evaluation(object):
         if nums > 1:
             if self.max_power == 8:
                 for i in range(1, nums):
-                    self.best_hand = self.flush_and_straight_compare(self.best_hand[0], self.max_power_hands[i]) 
-                if len(self.best_hand) == 2:
-                    if self.best_hand[0] == self.best_hand[1]:
-                        self.best_hand.pop()
+                    temp = self.flush_and_straight_compare(self.best_hand[0], self.max_power_hands[i]) 
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 7:
                 for i in range(1, nums):
-                    self.best_hand = self.four_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.four_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 6:
                 for i in range(1, nums):
-                    self.best_hand = self.full_house_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.full_house_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 5:
                 for i in range(1, nums):
-                    self.best_hand = self.flush_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.flush_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 4:
                 for i in range(1, nums):
-                    self.best_hand = self.straight_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.straight_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 3:
                 for i in range(1, nums):
-                    self.best_hand = self.three_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.three_of_a_kind_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 2:
                 for i in range(1, nums):
-                    self.best_hand = self.two_pairs_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.two_pairs_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 1:
                 for i in range(1, nums):
-                    self.best_hand = self.one_pair_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.one_pair_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
             if self.max_power == 0:
                 for i in range(1, nums):
-                    self.best_hand = self.high_card_compare(self.best_hand[0], self.max_power_hands[i])
+                    temp = self.high_card_compare(self.best_hand[0], self.max_power_hands[i])
+                    if len(temp) == 1:
+                        self.best_hand = temp
+                    else:
+                        self.best_hand.append(self.max_power_hands[i])
     
     def get_max_power_hands(self):
         power_dict = {8:[], 7:[], 6:[], 5:[], 4:[], 3:[], 2:[], 1:[], 0:[]}

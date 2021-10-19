@@ -87,10 +87,13 @@ class Game(object):
                         evaluate = Evaluation(None)
                         evaluate.all_possible = candidates_cards
                         evaluate.get_best_hand()
-                        for i in range(len(candidates_cards)):
-                            if evaluate.best_hand[0] == candidates_cards[i]:
-                                winner = self.search_player(candidates_name[i])
-                                winner.win_pot(self.pot)
+                        num_winner = len(evaluate.best_hand)
+                        pot_win = int(self.pot/num_winner)
+                        for win_cards in evaluate.best_hand:
+                            for i in range(len(candidates_cards)):
+                                if win_cards == candidates_cards[i]:
+                                    winner = self.search_player(candidates_name[i])
+                                    winner.win_pot(pot_win)
 
 
 
