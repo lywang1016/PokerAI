@@ -122,7 +122,7 @@ class Croupier(object):
         return player_cards, bfo, afo
 
     def burn_card(self):
-        card = self.deck.draw()
+        self.deck.draw()
     
     def deal_flop(self):
         self.burn_card()

@@ -70,6 +70,7 @@ class Player(object):
         return 0
 
     def win_pot(self, pot_size):
+        print(self.name + " win pot has " + str(pot_size) + " chips")
         self.chips += pot_size
         self.status = 0
         self.round_bet = 0
@@ -78,8 +79,8 @@ class Player(object):
         if len(self.__all_cards) == 7:
             evaluate = Evaluation(self.__all_cards)
             evaluate.get_best_hand()
-            print("My card power is: " + evaluate.power_info[evaluate.max_power])
-            print("My best hand is:")
+            print(self.name + "'s card power is: " + evaluate.power_info[evaluate.max_power])
+            print(self.name + "'s best hand is:")
             for card in evaluate.best_hand:
                 card.show()
             return evaluate.best_hand
@@ -95,7 +96,11 @@ class Player(object):
                 return self.__call()
         else: # Human player
             self.show_hand()
-            action = int(input("Pick actions: 0 for fold, 1 for check/call, 2 for raise: "))
+            if chips_to_call == 0:
+                action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))
+            else:
+                print(str(chips_to_call) + " chips to call." )
+                action = int(input("Pick actions: 0 for fold, 1 for call, 2 for raise: "))
             if action == 0:
                 return self.__fold()
             if action == 1:
