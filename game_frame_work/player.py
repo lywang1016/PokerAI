@@ -21,6 +21,7 @@ class Player(object):
         self.action_def = {0:"Fold",
                            1:"Check/Call",
                            2:"Raise"}
+        self.game_log = []
         self.__hand = []
         self.__all_cards = []
     
@@ -93,7 +94,7 @@ class Player(object):
             else:
                 return self.__call()
         else: # Human player
-            # print("Pick actions: 0 for fold, 1 for check/call, 2 for raise")
+            self.show_hand()
             action = int(input("Pick actions: 0 for fold, 1 for check/call, 2 for raise: "))
             if action == 0:
                 return self.__fold()
@@ -106,11 +107,15 @@ class Player(object):
                 chips_raise = int(input("Min raise is: " + str(self.min_raise) + " Input chips to raise: "))
                 return self.__raise(chips_raise)
 
+    def get_log(self, log):
+        self.game_log = log
+
     def get_1_card(self, card):
         if len(self.__hand) < 2:
             self.__hand.append(card)
             self.__all_cards.append(card)
             self.status = 1
+            self.game_log = []
 
     def get_flop(self, cards):
         self.flop = cards
@@ -167,6 +172,22 @@ class Player(object):
         # print(self.name + " Raise " + str(raise_num) + " chips")
         self.round_bet += raise_num
         return [2, raise_num]
+
+class ActionLog(object):
+    def __init__(self, name, action, chip_bet, chip_left, pot):
+        self.name = name
+        self.action = action
+        self.chip_bet = chip_bet
+        self.chip_left = chip_left
+        self.pot = pot
+        self.print_log()
+    
+    def print_log(self):
+        if self.action == "call" or self.action == "raise":
+            print(self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
+        else:
+            print(self.name + " " + self.action + "\tPot has: " + str(self.pot))
+
 
 if __name__ == '__main__': 
     myDeck = Deck()
