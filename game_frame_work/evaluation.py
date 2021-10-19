@@ -19,14 +19,15 @@ class Evaluation(object):
                            8:"Flush and straight"}
 
     def build_all_possible(self):
-        if len(self.cards) == 7:
-            for i in range(6):
-                for j in range(i+1, 7):
-                    temp = []
-                    for k in range(7):
-                        if k != i and k != j:
-                            temp.append(self.cards[k])
-                    self.all_possible.append(temp)
+        if self.cards != None:
+            if len(self.cards) == 7:
+                for i in range(6):
+                    for j in range(i+1, 7):
+                        temp = []
+                        for k in range(7):
+                            if k != i and k != j:
+                                temp.append(self.cards[k])
+                        self.all_possible.append(temp)
 
     def get_best_hand(self):
         self.get_max_power_hands()
