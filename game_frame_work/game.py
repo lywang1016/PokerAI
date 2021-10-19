@@ -9,7 +9,7 @@ class Game(object):
         self.bb = bb
         self.max_player_num = max_player_num
         self.pot = 0
-        self.log = {}
+        self.all_logs = {}
         self.game_num = 0
         self.log = []
         self.log_before_flop = []
@@ -95,6 +95,11 @@ class Game(object):
                                     winner = self.search_player(candidates_name[i])
                                     winner.win_pot(pot_win)
 
+        # save log
+        self.all_logs[self.game_num] = self.log
+        # players return cards
+        for player in self.player_list:
+            player.return_cards()
 
 
     def deal_hand_cards(self):
@@ -396,6 +401,8 @@ if __name__ == '__main__':
     ## Start 1 game
     print("Now Game Begin!")
     game.start_1_game()
+    # game.start_1_game()
+
     
     
 

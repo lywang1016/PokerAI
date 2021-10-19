@@ -48,6 +48,46 @@ class Player(object):
         for card in self.__hand:
             card.show()
         return self.__hand
+
+    def show_flop(self):
+        if len(self.flop) > 0:
+            print("Flop cards are:")
+            for card in self.flop:
+                card.show()
+
+    def show_turn(self):
+        if self.turn != None:
+            print("Turn card is:")
+            self.turn.show()
+
+    def show_river(self):
+        if self.river != None:
+            print("River card is:")
+            self.river.show()
+
+    def show_log_before_flop(self):
+        if len(self.game_log[0]) > 0:
+            print("Log before flop: ")
+            for log in self.game_log[0]:
+                log.print_log()
+
+    def show_log_flop(self):
+        if len(self.game_log[1]) > 0:
+            print("Log flop: ")
+            for log in self.game_log[1]:
+                log.print_log()
+
+    def show_log_turn(self):
+        if len(self.game_log[2]) > 0:
+            print("Log turn: ")
+            for log in self.game_log[2]:
+                log.print_log()
+        
+    def show_log_river(self):
+        if len(self.game_log[3]) > 0:
+            print("Log river: ")
+            for log in self.game_log[3]:
+                log.print_log()
     
     def show_chips(self):
         print(self.name + " have " + str(self.chips) + " chips")
@@ -75,6 +115,11 @@ class Player(object):
         self.status = 0
         self.round_bet = 0
 
+    def return_cards(self):
+        self.__hand = []
+        self.__all_cards = []
+        self.game_log = []
+
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
             evaluate = Evaluation(self.__all_cards)
@@ -96,6 +141,14 @@ class Player(object):
                 return self.__call()
         else: # Human player
             self.show_hand()
+            self.show_log_before_flop()
+            self.show_flop()
+            self.show_log_flop()
+            self.show_turn()
+            self.show_log_turn()
+            self.show_river()
+            self.show_log_river()
+
             if chips_to_call == 0:
                 action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))
             else:
@@ -120,7 +173,6 @@ class Player(object):
             self.__hand.append(card)
             self.__all_cards.append(card)
             self.status = 1
-            self.game_log = []
 
     def get_flop(self, cards):
         self.flop = cards
@@ -189,9 +241,9 @@ class ActionLog(object):
     
     def print_log(self):
         if self.action == "call" or self.action == "raise":
-            print(self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
+            print("\t" + self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
         else:
-            print(self.name + " " + self.action + "\tPot has: " + str(self.pot))
+            print("\t" + self.name + " " + self.action + "\tPot has: " + str(self.pot))
 
 
 if __name__ == '__main__': 
