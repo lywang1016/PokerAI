@@ -1,6 +1,4 @@
-from deckofcards import Card, Deck
-from evaluation import Evaluation
-from player import Player
+from deckofcards import Deck
 
 class Croupier(object):
     def __init__(self):

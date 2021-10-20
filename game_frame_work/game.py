@@ -1,5 +1,4 @@
-from deckofcards import Card, Deck
-from evaluation import Evaluation
+from evaluation import CompareHands
 from player import Player, ActionLog
 from croupier import Croupier
 
@@ -9,7 +8,7 @@ class Game(object):
         self.bb = bb
         self.max_player_num = max_player_num
         self.pot = 0
-        self.log = {}
+        self.all_logs = {}
         self.game_num = 0
         self.log = []
         self.log_before_flop = []
@@ -79,19 +78,28 @@ class Game(object):
                     self.after_flop_actions('river')
                     if not self.winner_get:
                         candidates_name = []
+                        candidates_hand = []
                         candidates_cards = []
                         for player in self.player_list:
                             if player.status == 1:
+                                candidates_hand.append(player.show_hand())
                                 candidates_name.append(player.name)
                                 candidates_cards.append(player.show_best_hand())
-                        evaluate = Evaluation(None)
-                        evaluate.all_possible = candidates_cards
-                        evaluate.get_best_hand()
-                        for i in range(len(candidates_cards)):
-                            if evaluate.best_hand == candidates_cards[i]:
-                                winner = self.search_player(candidates_name[i])
-                                winner.win_pot(self.pot)
+                        compare = CompareHands()
+                        best_hand = compare.best_hand(candidates_cards)
+                        num_winner = len(best_hand)
+                        pot_win = int(self.pot/num_winner)
+                        for win_cards in best_hand:
+                            for i in range(len(candidates_cards)):
+                                if win_cards == candidates_cards[i]:
+                                    winner = self.search_player(candidates_name[i])
+                                    winner.win_pot(pot_win)
 
+        # save log
+        self.all_logs[self.game_num] = self.log
+        # players return cards
+        for player in self.player_list:
+            player.return_cards()
 
 
     def deal_hand_cards(self):
@@ -373,26 +381,6 @@ class Game(object):
                 
 
 
-if __name__ == '__main__': 
-    ## Game setting
-    sb = 1
-    bb = 2
-    max_player_num = 8
-    game = Game(sb, bb, max_player_num)
-
-    ## Init players
-    ai_player = Player("bot", 500, 1)
-    human_player = Player("lyw", 500, 0)
-    ai_player.join_game_application()
-    human_player.join_game_application()
-
-    ## Player join game
-    game.host_player(ai_player)
-    game.host_player(human_player)
-
-    ## Start 1 game
-    print("Now Game Begin!")
-    game.start_1_game()
     
     
 
