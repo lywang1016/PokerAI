@@ -2,7 +2,7 @@ from deckofcards import Deck
 from evaluation import Cards7Evaluate
 
 class Player(object):
-    def __init__(self, name, chips, is_ai):
+    def __init__(self, name, chips, policy):
         self.name = name
         self.chips = chips
         self.flop = []
@@ -17,7 +17,7 @@ class Player(object):
         self.status = 0
         self.seat_num = -1
         self.join = 0
-        self.is_ai = is_ai
+        self.policy = policy
         self.action_def = {0:"Fold",
                            1:"Check/Call",
                            2:"Raise"}
@@ -134,12 +134,12 @@ class Player(object):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
 
-        if self.is_ai: # AI player
+        if self.policy == 'call': # AI player always call
             if self.chips_to_call == 0:
                 return self.__check()
             else:
                 return self.__call()
-        else: # Human player
+        if self.policy == 'human': # Human player
             self.show_hand()
             self.show_log_before_flop()
             self.show_flop()
