@@ -1,5 +1,4 @@
-from deckofcards import Card, Deck
-from evaluation import Evaluation
+from evaluation import CompareHands
 from player import Player, ActionLog
 from croupier import Croupier
 
@@ -84,12 +83,11 @@ class Game(object):
                             if player.status == 1:
                                 candidates_name.append(player.name)
                                 candidates_cards.append(player.show_best_hand())
-                        evaluate = Evaluation(None)
-                        evaluate.all_possible = candidates_cards
-                        evaluate.get_best_hand()
-                        num_winner = len(evaluate.best_hand)
+                        compare = CompareHands()
+                        best_hand = compare.best_hand(candidates_cards)
+                        num_winner = len(best_hand)
                         pot_win = int(self.pot/num_winner)
-                        for win_cards in evaluate.best_hand:
+                        for win_cards in best_hand:
                             for i in range(len(candidates_cards)):
                                 if win_cards == candidates_cards[i]:
                                     winner = self.search_player(candidates_name[i])

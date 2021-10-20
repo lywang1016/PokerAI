@@ -1,5 +1,5 @@
-from deckofcards import Card, Deck
-from evaluation import Evaluation
+from deckofcards import Deck
+from evaluation import Cards7Evaluate
 
 class Player(object):
     def __init__(self, name, chips, is_ai):
@@ -122,9 +122,8 @@ class Player(object):
 
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
-            evaluate = Evaluation(self.__all_cards)
-            evaluate.get_best_hand()
-            print(self.name + "'s card power is: " + evaluate.power_info[evaluate.max_power])
+            evaluate = Cards7Evaluate(self.__all_cards)
+            print(self.name + "'s card power is: " + evaluate.max_power_str)
             print(self.name + "'s best hand is:")
             for card in evaluate.best_hand[0]:
                 card.show()
