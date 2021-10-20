@@ -47,7 +47,7 @@ class Player(object):
         print(self.name + "'s hand cards are:")
         for card in self.__hand:
             card.show()
-        return self.__hand
+        # return self.__hand
 
     def show_flop(self):
         if len(self.flop) > 0:
@@ -116,6 +116,7 @@ class Player(object):
         self.round_bet = 0
 
     def return_cards(self):
+        self.show_hand()
         self.__hand = []
         self.__all_cards = []
         self.game_log = []
