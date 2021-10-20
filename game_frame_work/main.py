@@ -9,13 +9,13 @@ if __name__ == '__main__':
     game = Game(sb, bb, max_player_num)
 
     ## Init players
-    ai_player = Player("bot", 500, 1)
-    human_player = Player("lyw", 500, 1)
-    ai_player.join_game_application()
-    human_player.join_game_application()
+    ai_player1 = Player("bot", 500, 'call')
+    human_player = Player("lyw", 500, 'human')
 
     ## Player join game
-    game.host_player(ai_player)
+    ai_player1.join_game_application()
+    human_player.join_game_application()
+    game.host_player(ai_player1)
     game.host_player(human_player)
 
     ## Start 1 game
