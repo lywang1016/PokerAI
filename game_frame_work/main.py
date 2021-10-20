@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     ## Init players
     ai_player = Player("bot", 500, 1)
-    human_player = Player("lyw", 500, 0)
+    human_player = Player("lyw", 500, 1)
     ai_player.join_game_application()
     human_player.join_game_application()
 

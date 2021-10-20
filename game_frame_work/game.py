@@ -78,9 +78,11 @@ class Game(object):
                     self.after_flop_actions('river')
                     if not self.winner_get:
                         candidates_name = []
+                        candidates_hand = []
                         candidates_cards = []
                         for player in self.player_list:
                             if player.status == 1:
+                                candidates_hand.append(player.show_hand())
                                 candidates_name.append(player.name)
                                 candidates_cards.append(player.show_best_hand())
                         compare = CompareHands()
