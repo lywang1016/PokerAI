@@ -1,5 +1,6 @@
+import math
 from evaluation import CompareHands
-from player import Player, ActionLog
+from player import ActionLog
 from croupier import Croupier
 
 class Game(object):
@@ -88,7 +89,7 @@ class Game(object):
                         compare = CompareHands()
                         best_hand = compare.best_hand(candidates_cards)
                         num_winner = len(best_hand)
-                        pot_win = int(self.pot/num_winner)
+                        pot_win = math.floor(self.pot/num_winner)
                         for win_cards in best_hand:
                             for i in range(len(candidates_cards)):
                                 if win_cards == candidates_cards[i]:
