@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     ## Init players
     ai_player1 = Player("bot1", 500, 'call')
-    ai_player2 = Player("bot2", 500, 'call')
+    ai_player2 = Player("bot2", 500, 'fold')
     ai_player3 = Player("bot3", 500, 'call')
     # human_player = Player("lyw", 500, 'human')
 
