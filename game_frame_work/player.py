@@ -1,6 +1,6 @@
 from game_frame_work.deckofcards import Deck
 from game_frame_work.evaluation import Cards7Evaluate
-from policy_of_ai.naive_policy_wly import AlwaysCall, AlwaysFold
+from policy_of_ai.naive_policy_wly import AlwaysCall, AlwaysFold, AlwaysRaise
 
 class Player(object):
     def __init__(self, name, chips, policy):
@@ -148,7 +148,7 @@ class Player(object):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
 
-        if self.policy == 'fold': # AI player always call
+        if self.policy == 'fold': # AI player always fold
             policy = AlwaysFold(self.name, self.__hand, 
                                 self.flop, self.turn, self.river, 
                                 self.bfo, self.afo, self.game_log, 
@@ -157,6 +157,13 @@ class Player(object):
             return self.take_action(action)
         if self.policy == 'call': # AI player always call
             policy = AlwaysCall(self.name, self.__hand, 
+                                self.flop, self.turn, self.river, 
+                                self.bfo, self.afo, self.game_log, 
+                                self.chips_to_call, self.min_raise)
+            action = policy.action_should_take()
+            return self.take_action(action)
+        if self.policy == 'raise': # AI player always raise
+            policy = AlwaysRaise(self.name, self.__hand, 
                                 self.flop, self.turn, self.river, 
                                 self.bfo, self.afo, self.game_log, 
                                 self.chips_to_call, self.min_raise)

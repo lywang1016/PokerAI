@@ -11,7 +11,7 @@ if __name__ == '__main__':
     ## Init players
     ai_player1 = Player("bot1", 500, 'call')
     ai_player2 = Player("bot2", 500, 'fold')
-    ai_player3 = Player("bot3", 500, 'call')
+    ai_player3 = Player("bot3", 500, 'raise')
     # human_player = Player("lyw", 500, 'human')
 
     ## Player join game
@@ -27,6 +27,7 @@ if __name__ == '__main__':
     ## Start 1 game
     print("Now Game Begin!")
     game.start_1_game()
+    # game.start_1_game()
 
     # for i in range(100):
     #     game.start_1_game()
