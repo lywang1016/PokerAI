@@ -1,4 +1,4 @@
-from deckofcards import Deck
+from game_frame_work.deckofcards import Deck
 
 class Classification(object):
     def __init__(self):

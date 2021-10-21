@@ -1,4 +1,4 @@
-from deckofcards import Deck
+from game_frame_work.deckofcards import Deck
 
 class Croupier(object):
     def __init__(self):

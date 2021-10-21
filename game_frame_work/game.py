@@ -1,7 +1,7 @@
 import math
-from evaluation import CompareHands
-from player import ActionLog
-from croupier import Croupier
+from game_frame_work.evaluation import CompareHands
+from game_frame_work.player import ActionLog
+from game_frame_work.croupier import Croupier
 
 class Game(object):
     def __init__(self, sb, bb, max_player_num):
@@ -106,6 +106,10 @@ class Game(object):
     def deal_hand_cards(self):
         print("------------Deal hand cards--------------")
         player_cards, self.bfo, self.afo = self.croupier.deal_hand_cards()
+
+        for player in self.player_list: # inform every one order of action
+            player.get_order_of_action(self.bfo, self.afo)
+
         if len(self.afo) == 2:
             sb_player = self.search_player(self.afo[1])
             self.pot += sb_player.set_your_position(0)

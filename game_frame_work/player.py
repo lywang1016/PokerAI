@@ -1,5 +1,6 @@
-from deckofcards import Deck
-from evaluation import Cards7Evaluate
+from game_frame_work.deckofcards import Deck
+from game_frame_work.evaluation import Cards7Evaluate
+from policy_of_ai.always_call_wly import AlwaysCall
 
 class Player(object):
     def __init__(self, name, chips, policy):
@@ -11,6 +12,8 @@ class Player(object):
         self.position = None
         self.sb = 0
         self.bb = 0
+        self.bfo = []
+        self.afo = []
         self.round_bet = 0
         self.chips_to_call = 0
         self.min_raise = 0
@@ -129,16 +132,33 @@ class Player(object):
             for card in evaluate.best_hand[0]:
                 card.show()
             return evaluate.best_hand[0]
+
+    def take_action(self, action):
+        if action[0] == 0:
+            return self.__fold()
+        elif action[0] == 1:
+            if action[1] == 0:
+                return self.__check()
+            else:
+                return self.__call()
+        else:
+            return self.__raise(action[1])
     
     def your_action(self, chips_to_call, min_raise):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
 
         if self.policy == 'call': # AI player always call
-            if self.chips_to_call == 0:
-                return self.__check()
-            else:
-                return self.__call()
+            policy = AlwaysCall(self.name, self.__hand, 
+                                self.flop, self.turn, self.river, 
+                                self.bfo, self.afo, self.game_log, 
+                                self.chips_to_call, self.min_raise)
+            action = policy.action_should_take()
+            return self.take_action(action)
+            # if self.chips_to_call == 0:
+            #     return self.__check()
+            # else:
+            #     return self.__call()
         if self.policy == 'human': # Human player
             self.show_hand()
             self.show_log_before_flop()
@@ -167,6 +187,10 @@ class Player(object):
 
     def get_log(self, log):
         self.game_log = log
+
+    def get_order_of_action(self, bfo, afo):
+        self.bfo = bfo
+        self.afo = afo
 
     def get_1_card(self, card):
         if len(self.__hand) < 2:

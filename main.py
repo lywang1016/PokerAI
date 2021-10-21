@@ -1,5 +1,5 @@
-from player import Player
-from game import Game
+from game_frame_work.player import Player
+from game_frame_work.game import Game
 
 if __name__ == '__main__': 
     ## Game setting
