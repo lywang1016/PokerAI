@@ -159,21 +159,21 @@ class Player(object):
         self.min_raise = min_raise
 
         if self.policy == 'fold': # AI player always fold
-            policy = AlwaysFold(self.name, self.__hand, 
+            policy = AlwaysFold(self.name, self.chips, self.__hand, 
                                 self.flop, self.turn, self.river, 
                                 self.bfo, self.afo, self.game_log, 
                                 self.chips_to_call, self.min_raise)
             action = policy.action_should_take()
             return self.take_action(action)
         if self.policy == 'call': # AI player always call
-            policy = AlwaysCall(self.name, self.__hand, 
+            policy = AlwaysCall(self.name, self.chips, self.__hand, 
                                 self.flop, self.turn, self.river, 
                                 self.bfo, self.afo, self.game_log, 
                                 self.chips_to_call, self.min_raise)
             action = policy.action_should_take()
             return self.take_action(action)
         if self.policy == 'raise': # AI player always raise
-            policy = AlwaysRaise(self.name, self.__hand, 
+            policy = AlwaysRaise(self.name, self.chips, self.__hand, 
                                 self.flop, self.turn, self.river, 
                                 self.bfo, self.afo, self.game_log, 
                                 self.chips_to_call, self.min_raise)
