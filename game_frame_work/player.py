@@ -123,6 +123,16 @@ class Player(object):
         self.__hand = []
         self.__all_cards = []
         self.game_log = []
+        self.flop = []
+        self.turn = None
+        self.river = None
+        self.position = None
+        self.bfo = []
+        self.afo = []
+        self.round_bet = 0
+        self.chips_to_call = 0
+        self.min_raise = 0
+        self.status = 0
 
     def show_best_hand(self):
         if len(self.__all_cards) == 7:

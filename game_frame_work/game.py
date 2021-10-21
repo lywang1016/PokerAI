@@ -90,11 +90,22 @@ class Game(object):
                         best_hand = compare.best_hand(candidates_cards)
                         num_winner = len(best_hand)
                         pot_win = math.floor(self.pot/num_winner)
-                        for win_cards in best_hand:
-                            for i in range(len(candidates_cards)):
-                                if win_cards == candidates_cards[i]:
-                                    winner = self.search_player(candidates_name[i])
-                                    winner.win_pot(pot_win)
+                        
+                        
+                        for i in range(len(candidates_cards)):
+                            candidate_name = candidates_name[i]
+                            candidate_card = candidates_cards[i]
+                            candidate_win = False
+                            for j in range(num_winner):
+                                res = compare.better_hand(best_hand[j], candidate_card)
+                                if len(res) == 2:
+                                    candidate_win = True
+                                    break
+                            if candidate_win:
+                                winner = self.search_player(candidate_name)
+                                winner.win_pot(pot_win)
+
+                        print(num_winner)
 
         # save log
         self.all_logs[self.game_num] = self.log
@@ -143,6 +154,7 @@ class Game(object):
     def before_flop_actions(self):
         print("------------Before flop actions--------------")
         action_idx = 0
+        bb_action_flag = False
         while True:
             # check players left
             active_num = 0
@@ -160,7 +172,7 @@ class Game(object):
             # check round bets same
             round_bets = self.get_round_bets()
             round_bets.sort()
-            if round_bets[0] == round_bets[-1]:
+            if round_bets[0] == round_bets[-1] and bb_action_flag:
                 break
             
             round_bet_target = round_bets[-1]
@@ -196,6 +208,7 @@ class Game(object):
             action_idx += 1
             if action_idx == len(self.player_list):
                 action_idx = 0
+                bb_action_flag = True
     
     def flop(self):
         print("------------Deal flop cards--------------")
