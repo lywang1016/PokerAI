@@ -87,25 +87,13 @@ class Game(object):
                                 candidates_name.append(player.name)
                                 candidates_cards.append(player.show_best_hand())
                         compare = CompareHands()
-                        best_hand = compare.best_hand(candidates_cards)
+                        best_hand, best_idx = compare.best_hand(candidates_cards)
                         num_winner = len(best_hand)
                         pot_win = math.floor(self.pot/num_winner)
-                        
-                        
-                        for i in range(len(candidates_cards)):
-                            candidate_name = candidates_name[i]
-                            candidate_card = candidates_cards[i]
-                            candidate_win = False
-                            for j in range(num_winner):
-                                res = compare.better_hand(best_hand[j], candidate_card)
-                                if len(res) == 2:
-                                    candidate_win = True
-                                    break
-                            if candidate_win:
-                                winner = self.search_player(candidate_name)
-                                winner.win_pot(pot_win)
 
-                        print(num_winner)
+                        for i in best_idx:
+                            winner = self.search_player(candidates_name[i])
+                            winner.win_pot(pot_win)
 
         # save log
         self.all_logs[self.game_num] = self.log

@@ -165,16 +165,19 @@ class CompareHands(object):
             return hand_list
 
         res = [hand_list[0]]
+        res_idx = [0]
         for i in range(1, len(hand_list)):
             better = self.better_hand(res[0], hand_list[i])
             if len(better) == 1:
                 if better[0] == hand_list[i]:
                     res = [hand_list[i]]
+                    res_idx = [i]
             else:
                 if hand_list[i] in better:
                     res.append(hand_list[i])
+                    res_idx.append(i)
 
-        return res
+        return res, res_idx
 
     def better_hand(self, hand1, hand2):
         power1 = self.classifier.classify(hand1)
@@ -402,7 +405,7 @@ class Cards7Evaluate(object):
         self.all_possible = []
         self.build_all_possible()
         self.compare = CompareHands()
-        self.best_hand = self.compare.best_hand(self.all_possible)
+        self.best_hand, self.best_idx = self.compare.best_hand(self.all_possible)
         self.max_power = -1
         self.max_power_str = ""
         if len(self.best_hand) > 0:
