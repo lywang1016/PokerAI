@@ -23,12 +23,12 @@ You can also change the number of game you want to play in the for loop. The pla
 ## Policy attribute
 Now you want to build your own policy. It's good to know the current set up.
 
-In folder policy_of_ai, now there is a sample file naive_policy_wly.py
+In folder 'policy_of_ai', now there is a sample file 'naive_policy_wly.py'
 
 Inside that file, a policy class is defind with 11 attributes. Where:
 - 'my_name' is the name of the AI player now need to take action. It is a string.
 - 'chips' is how many chips this player have. It is a number.
-- 'hand' is the two hand cards this player have. It is a list of Card class, where defined in file game_frame_work/deckofcards.py
+- 'hand' is the two hand cards this player have. It is a list of Card class, where defined in file 'game_frame_work/deckofcards.py'
 - 'flop' is the three flop cards. It is a list of Card class.
 - 'turn' is the turn card. It is a Card class.
 - 'river' is the river card. It is a Card class.
@@ -43,7 +43,7 @@ In Player class the method your_action() will be called by Game class, when the 
 The action should take is defined as a list which have two numbers. The first number represents for the action. It could be 0 represent "fold" action, 1 represent "check" or "call" action, and 2 represent "raise" action. The second number represent the chips bet with this action. For "fold" and "check" action, the second number is 0.
 
 ## Game log definition
-First, a ActionLog class is defined in file game_frame_work/player.py. The attributes are:
+First, a ActionLog class is defined in file 'game_frame_work/player.py'. The attributes are:
 - 'name' is the name who take action. It is a string.
 - 'action' is the action taken. It is a string and may be "fold", "check", "call", and "raise".
 - 'chip_bet ' is how much chips the player bet to the pot. It is a number.
@@ -58,4 +58,9 @@ There are 4 different log list:
 - 'log_turn' saves the ActionLog at turn.
 - 'log_river' saves the ActionLog at river.
 
-The 4 log lists described above will be updated when any action happen during the game, and they are the components of list 'log'. Where 'log' is a variable of class Game. Also when any action happen, Game object will broadcast 'log' to all players.
+The 4 log lists described above will be updated when any action happen during the game, and they are the components of list 'log'. Where 'log' is a variable of class Game. Also when any action happen, Game object will broadcast 'log' to all players. 
+
+The attribute 'game_log' of Policy is same as 'log' of Game.
+
+## Card evaluation
+You may want to use some methods defined in file 'game_frame_work/evaluation.py' in your policy developent. There are detaied code comments in that file. I believe the comments should be clear enough.

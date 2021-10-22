@@ -1,5 +1,6 @@
 from game_frame_work.deckofcards import Deck
 
+## The class to classify 5 cards base on the game rule
 class Classification(object):
     def __init__(self):
         self.power_info = {0:"High card",
@@ -12,6 +13,13 @@ class Classification(object):
                            7:"Four of a kind",
                            8:"Flush and straight"}
 
+    ################################################################
+    # - Method name: classify
+    # - Method inputs: test 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: a number represents the power defined in 
+    #   'self.power_info'
+    ################################################################
     def classify(self, test):
         four_of_a_kind = self.if_four_of_a_kind(test)
         full_house = self.if_full_house(test)
@@ -39,6 +47,13 @@ class Classification(object):
         else:
             return 0
 
+    ################################################################
+    # - Method name: if_four_of_a_kind
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Four of a kind"
+    ################################################################
     def if_four_of_a_kind(self, cards5):
         values = {}
         for card in cards5:
@@ -55,6 +70,13 @@ class Classification(object):
         else:
             return False
 
+    ################################################################
+    # - Method name: if_full_house
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Full house"
+    ################################################################
     def if_full_house(self, cards5):
         values = {}
         for card in cards5:
@@ -71,6 +93,13 @@ class Classification(object):
         else:
             return False
 
+    ################################################################
+    # - Method name: if_flush
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Flush"
+    ################################################################
     def if_flush(self, cards5):
         card = cards5[0]
         suit = card.suit
@@ -80,6 +109,13 @@ class Classification(object):
                 return False
         return True
 
+    ################################################################
+    # - Method name: if_straight
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Straight"
+    ################################################################
     def if_straight(self, cards5):
         values = []
         for card in cards5:
@@ -99,6 +135,13 @@ class Classification(object):
                     return False
             return True
 
+    ################################################################
+    # - Method name: if_three_of_a_kind
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Three of a kind"
+    ################################################################
     def if_three_of_a_kind(self, cards5):
         values = {}
         for card in cards5:
@@ -118,6 +161,13 @@ class Classification(object):
         else:
             return False
 
+    ################################################################
+    # - Method name: if_two_pairs
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "Two pairs"
+    ################################################################
     def if_two_pairs(self, cards5):
         values = {}
         for card in cards5:
@@ -137,6 +187,13 @@ class Classification(object):
         else:
             return False
 
+    ################################################################
+    # - Method name: if_one_pair
+    # - Method inputs: cards5 
+    #   which is a card list. The list should have exactly 5 cards.                
+    # - Method outputs: True or False, represents whether the 5 
+    #   cards is "One pair"
+    ################################################################
     def if_one_pair(self, cards5):
         values = {}
         for card in cards5:
@@ -156,10 +213,18 @@ class Classification(object):
         else:
             return False
 
+## The class to compare 2 set of 5 cards base on the game rule
 class CompareHands(object):
     def __init__(self):
         self.classifier = Classification()
 
+    ################################################################
+    # - Method name: best_hand
+    # - Method inputs: hand_list, which is a list of 'cards5' list.                
+    # - Method outputs: res, res_idx
+    #   Where 'res' is a list of best 'cards5' set
+    #   'res_idx' is the index of best set in 'hand_list'  
+    ################################################################
     def best_hand(self, hand_list):
         if len(hand_list) < 2:
             return hand_list
@@ -179,6 +244,14 @@ class CompareHands(object):
 
         return res, res_idx
 
+    ################################################################
+    # - Method name: better_hand
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5'               
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def better_hand(self, hand1, hand2):
         power1 = self.classifier.classify(hand1)
         power2 = self.classifier.classify(hand2)
@@ -207,7 +280,11 @@ class CompareHands(object):
                 return self.flush_and_straight_compare(hand1, hand2)
         return []
 
-
+    ################################################################
+    # - Method name: hand_sort
+    # - Method inputs: cards5 set             
+    # - Method outputs: cards5 set in ascending order, done in place
+    ################################################################
     def hand_sort(self, cards5):
         for i in range(4):
             for j in range(i+1, 5):
@@ -219,6 +296,15 @@ class CompareHands(object):
                 Ace_card = cards5.pop(0)
                 cards5.append(Ace_card)
 
+    ################################################################
+    # - Method name: high_card_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "High card" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def high_card_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -231,6 +317,15 @@ class CompareHands(object):
                 return [hand2]
         return [hand1, hand2]
 
+    ################################################################
+    # - Method name: one_pair_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "One pair" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def one_pair_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -265,6 +360,15 @@ class CompareHands(object):
                 return [hand2]
         return [hand1, hand2]
 
+    ################################################################
+    # - Method name: two_pairs_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Two pairs" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def two_pairs_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -306,6 +410,15 @@ class CompareHands(object):
             return [hand2]
         return [hand1, hand2]
 
+    ################################################################
+    # - Method name: three_of_a_kind_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Three of a kind" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def three_of_a_kind_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -340,6 +453,15 @@ class CompareHands(object):
                 return [hand2]
         return [hand1, hand2]
 
+    ################################################################
+    # - Method name: straight_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Straight" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def straight_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -361,12 +483,39 @@ class CompareHands(object):
         else:
             return [hand2]
 
+    ################################################################
+    # - Method name: flush_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Flush" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def flush_compare(self, hand1, hand2):
         return self.high_card_compare(hand1, hand2)
 
+    ################################################################
+    # - Method name: full_house_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Full house" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def full_house_compare(self, hand1, hand2):
         return self.three_of_a_kind_compare(hand1, hand2)
 
+    ################################################################
+    # - Method name: four_of_a_kind_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Four of a kind" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def four_of_a_kind_compare(self, hand1, hand2):
         self.hand_sort(hand1)
         self.hand_sort(hand2)
@@ -396,10 +545,27 @@ class CompareHands(object):
             return [hand2]
         return [hand1, hand2]
 
+    ################################################################
+    # - Method name: flush_and_straight_compare
+    # - Method inputs: hand1, hand2
+    #   Where hand1 and hand2 are two set of 'cards5' 
+    #   hand1 and hand2 must be all "Flush and straight" type!              
+    # - Method outputs: a list of better set
+    #   Because hand1 and hand2 could be smae power, so the result
+    #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
+    ################################################################
     def flush_and_straight_compare(self, hand1, hand2):
         return self.straight_compare(hand1, hand2)
 
+## The class to find out best 5 cards set in 7 cards, base on the game rule
 class Cards7Evaluate(object):
+    ################################################################
+    # - Method name: __init__
+    # - Method inputs: cards7, which is a list include 7 cards             
+    # - Method function: It will find the most powerfull 5 cards 
+    #   sets list and stored in 'self.best_hand'. At the same time, 
+    #   the index list of the best is in 'self.best_idx'
+    ################################################################
     def __init__(self, cards7):
         self.cards = cards7
         self.all_possible = []
@@ -412,6 +578,12 @@ class Cards7Evaluate(object):
             self.max_power = self.compare.classifier.classify(self.best_hand[0])
             self.max_power_str = self.compare.classifier.power_info[self.max_power]
 
+    ################################################################
+    # - Method name: build_all_possible
+    # - Method inputs:             
+    # - Method function: From 'self.cards' (7 cards), find out all
+    #   21 combinations of 5 cards sets store in 'self.all_possible'
+    ################################################################
     def build_all_possible(self):
         if self.cards != None:
             if len(self.cards) == 7:
@@ -486,7 +658,7 @@ if __name__ == '__main__':
 
     # hand_list = [cards2, cards1, cards2, cards1, cards2]
     # compare = CompareHands()
-    # best_hand = compare.best_hand(hand_list)
+    # best_hand, best_idx = compare.best_hand(hand_list)
     # for i in range(len(best_hand)):
     #     hand = best_hand[i]
     #     print("----------No. " + str(i+1) + " hand----------")
