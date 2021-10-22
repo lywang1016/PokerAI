@@ -73,3 +73,9 @@ You may want to use some methods defined in file 'game_frame_work/evaluation.py'
 To implement your own strategy, please first creat a file in 'policy_of_ai' folder. Currently there is an example file 'naive_policy_wly.py'. The file name has the general idea of your strategy as well as your name.
 
 In the created file, please create subclass of class Strategy defined in 'strategy.py' and implement your own algorithm to method 'action_should_take()'.
+
+## Todo list
+- When init Player object not just use a string represent strategy, but directly use a Strategy object
+- Consider some player run out of chips. Kick the player out after a game finish.
+- Deal with the case have side pot. Develop relavent logic.
+- Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project target on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)
