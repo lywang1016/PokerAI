@@ -26,4 +26,36 @@ Now you want to build your own policy. It's good to know the current set up.
 In folder policy_of_ai, now there is a sample file naive_policy_wly.py
 
 Inside that file, a policy class is defind with 11 attributes. Where:
-- 'my_name' is the name of the AI player now need to take action.
+- 'my_name' is the name of the AI player now need to take action. It is a string.
+- 'chips' is how many chips this player have. It is a number.
+- 'hand' is the two hand cards this player have. It is a list of Card class, where defined in file game_frame_work/deckofcards.py
+- 'flop' is the three flop cards. It is a list of Card class.
+- 'turn' is the turn card. It is a Card class.
+- 'river' is the river card. It is a Card class.
+- 'bfo' represents the action order befor flop card. It is a list of string. Each string is the name of a player. The order of the name is the order to take action before flop.
+- 'afo' represents the action order after flop card. It is a list of string. Each string is the name of a player. The order of the name is the order to take action after flop.
+- 'game_log' is the log of what happend since the game start. It include every action taken by players in game. It is a list of 4 list of game log. This part will be clarified in next section.
+- 'chips_to_call' is the number of chips to call if you chose "call" action. It is a number. The value 0 means the action is "check"
+- 'min_raise' is the nimimum number of chips to raise if you chose "raise" action. It is a number.
+
+In Player class the method your_action() will be called by Game class, when the player's turn to take action. At this moment, a Policy object is initialized with these attributes. The action_should_take() method of Policy is called and the Policy object should return the action recommend to take back to the player. It is interestion to implement different stratigies for this method, and it is the point for the project.
+
+The action should take is defined as a list which have two numbers. The first number represents for the action. It could be 0 represent "fold" action, 1 represent "check" or "call" action, and 2 represent "raise" action. The second number represent the chips bet with this action. For "fold" and "check" action, the second number is 0.
+
+## Game log definition
+First, a ActionLog class is defined in file game_frame_work/player.py. The attributes are:
+- 'name' is the name who take action. It is a string.
+- 'action' is the action taken. It is a string and may be "fold", "check", "call", and "raise".
+- 'chip_bet ' is how much chips the player bet to the pot. It is a number.
+- 'chip_left' is how much chips the player left after this action. It is a number.
+- 'pot' is the total pot size after this action. It is a number.
+
+Then in Game class, after each action taken by player, a ActionLog object will be initialized and added to corresponding log list. Notice there are two special actions called "small blind" and "big blind". These two action is assigned to small blind player and big blind player at the beginning of each game.
+
+There are 4 different log list:
+- 'log_before_flop' saves the ActionLog before flop. 
+- 'log_flop' saves the ActionLog at flop.
+- 'log_turn' saves the ActionLog at turn.
+- 'log_river' saves the ActionLog at river.
+
+The 4 log lists described above will be updated when any action happen during the game, and they are the components of list 'log'. Where 'log' is a variable of class Game. Also when any action happen, Game object will broadcast 'log' to all players.
