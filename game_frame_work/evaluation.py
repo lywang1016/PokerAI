@@ -249,7 +249,7 @@ class CompareHands(object):
     # - Method inputs: hand1, hand2
     #   Where hand1 and hand2 are two set of 'cards5'               
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def better_hand(self, hand1, hand2):
@@ -302,7 +302,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "High card" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def high_card_compare(self, hand1, hand2):
@@ -323,7 +323,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "One pair" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def one_pair_compare(self, hand1, hand2):
@@ -366,7 +366,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Two pairs" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def two_pairs_compare(self, hand1, hand2):
@@ -416,7 +416,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Three of a kind" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def three_of_a_kind_compare(self, hand1, hand2):
@@ -459,7 +459,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Straight" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def straight_compare(self, hand1, hand2):
@@ -489,7 +489,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Flush" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def flush_compare(self, hand1, hand2):
@@ -501,7 +501,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Full house" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def full_house_compare(self, hand1, hand2):
@@ -513,7 +513,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Four of a kind" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def four_of_a_kind_compare(self, hand1, hand2):
@@ -551,7 +551,7 @@ class CompareHands(object):
     #   Where hand1 and hand2 are two set of 'cards5' 
     #   hand1 and hand2 must be all "Flush and straight" type!              
     # - Method outputs: a list of better set
-    #   Because hand1 and hand2 could be smae power, so the result
+    #   Because hand1 and hand2 could be same power, so the result
     #   can be [hand1, hand2], or it will be just [hand1] or [hand2]
     ################################################################
     def flush_and_straight_compare(self, hand1, hand2):
