@@ -20,12 +20,12 @@ Policy 'human' will be human play and when the turn, you should input the action
 
 You can also change the number of game you want to play in the for loop. The player position will automatically be changed base on the game rule.
 
-## Game Policy (Strategy)
+## Game Strategy (Policy)
 Now you want to build your own policy to take action. It's good to know the current set up.
 
-In folder 'policy_of_ai', now there is a sample file 'naive_policy_wly.py'
+In folder 'policy_of_ai', now there is a sample file 'strategy.py'
 
-Inside that file, a policy class is defind with 11 attributes. Where:
+Inside that file, a Strategy class is defind with 11 attributes. Where:
 - 'my_name' is the name of the AI player now need to take action. It is a string.
 - 'chips' is how many chips this player have. It is a number.
 - 'hand' is the two hand cards this player have. It is a list of Card class, where defined in file 'game_frame_work/deckofcards.py'
@@ -68,3 +68,8 @@ The attribute 'game_log' of Policy is same as 'log' of Game.
 
 ## Card evaluation
 You may want to use some methods defined in file 'game_frame_work/evaluation.py' in your policy developent. There are detaied code comments in that file. I believe the comments should be clear enough.
+
+## Implement your own strategy
+To implement your own strategy, please first creat a file in 'policy_of_ai' folder. Currently there is an example file 'naive_policy_wly.py'. The file name has the general idea of your strategy as well as your name.
+
+In the created file, please create subclass of class Strategy defined in 'strategy.py' and implement your own algorithm to method 'action_should_take()'.
