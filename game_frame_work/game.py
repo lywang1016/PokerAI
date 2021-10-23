@@ -50,6 +50,11 @@ class Game(object):
             self.player_list.remove(player)
             self.croupier.drop_player(player)
 
+    def kick_player_no_chip(self):
+        for player in self.player_list:
+            if player.chips < self.bb:
+                self.kick_player(player)
+
     def search_player(self, name):
         for player in self.player_list:
             if player.name == name:
@@ -81,6 +86,10 @@ class Game(object):
                self.log_flop,
                self.log_turn,
                self.log_river]
+
+        self.kick_player_no_chip()
+        if len(self.player_list) < 2:
+            return
 
         self.deal_hand_cards()
         self.before_flop_actions()

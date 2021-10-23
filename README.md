@@ -75,6 +75,5 @@ To implement your own strategy, please first creat a file in 'policy_of_ai' fold
 In the created file, please create subclass of class Strategy defined in 'strategy.py' and implement your own algorithm to method 'action_should_take()'.
 
 ## Todo list
-- Consider some player run out of chips. Kick the player out after a game finish.
 - Deal with the case have side pot. Develop relavent logic.
 - Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project target on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)

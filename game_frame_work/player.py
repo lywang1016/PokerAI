@@ -8,6 +8,7 @@ class Player(object):
         self.flop = []
         self.turn = None
         self.river = None
+        self.all_in = False
         self.position = None
         self.sb = 0
         self.bb = 0
@@ -18,7 +19,6 @@ class Player(object):
         self.min_raise = 0
         self.status = 0
         self.seat_num = -1
-        self.join = 0
         self.policy = policy
         self.action_def = {0:"Fold",
                            1:"Check/Call",
@@ -34,12 +34,6 @@ class Player(object):
         print(self.name + "'s position is: " + str(self.position))
         print(self.name + "'s seat number is: " + str(self.seat_num))
         print(self.name + "'s status is: " + str(self.status))
-
-    def join_game_application(self):
-        self.join = 1
-    
-    def leave_game_application(self):
-        self.join = 0
 
     def say_hello(self):
         print("Hi my name is " + self.name)
@@ -132,6 +126,7 @@ class Player(object):
         self.chips_to_call = 0
         self.min_raise = 0
         self.status = 0
+        self.all_in = False
 
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
@@ -175,6 +170,7 @@ class Player(object):
             self.__hand.append(card)
             self.__all_cards.append(card)
             self.status = 1
+            self.all_in = False
 
     def get_flop(self, cards):
         self.flop = cards
@@ -205,7 +201,7 @@ class Player(object):
         return [1, 0]
 
     def __call(self):
-        if self.chips >= self.chips_to_call:
+        if self.chips > self.chips_to_call:
             self.chips -= self.chips_to_call
             self.status = 1
             # print(self.name + " Call " + str(self.chips_to_call) + " chips")
@@ -214,6 +210,7 @@ class Player(object):
         else:
             call_chips = self.chips
             self.chips = 0
+            self.all_in = True
             self.status = 1
             # print(self.name + " Call " + str(call_chips) + " chips")
             self.round_bet += call_chips
@@ -222,11 +219,12 @@ class Player(object):
     def __raise(self, raise_num):
         if raise_num < self.min_raise:
             raise_num = self.min_raise
-        if self.chips >= raise_num:
+        if self.chips > raise_num:
             self.chips -= raise_num
         else:
             raise_num = self.chips
             self.chips = 0
+            self.all_in = True
         self.status = 1
         # print(self.name + " Raise " + str(raise_num) + " chips")
         self.round_bet += raise_num
