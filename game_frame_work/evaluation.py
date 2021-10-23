@@ -480,8 +480,10 @@ class CompareHands(object):
 
         if max1 > max2:
             return [hand1]
-        else:
+        elif max2 > max1:
             return [hand2]
+        else:
+            return [hand1, hand2]
 
     ################################################################
     # - Method name: flush_compare

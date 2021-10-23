@@ -66,16 +66,9 @@ class Game(object):
     def get_round_bets(self):
         round_bet = []
         for player in self.player_list:
-            if player.status == 1 and player.all_in == False:
-                round_bet.append(player.round_bet) 
-        return round_bet
-
-    def get_round_total_bets(self):
-        res = 0
-        for player in self.player_list:
             if player.status == 1:
-                res += player.round_bet
-        return res
+                round_bet.append(player.round_bet) 
+        return round_bet, sum(round_bet)
 
     def broadcast_log(self):
         for player in self.player_list:
@@ -117,11 +110,11 @@ class Game(object):
                         compare = CompareHands()
                         while self.pot > 1:
                             candidates_name = []
-                            candidates_hand = []
+                            # candidates_hand = []
                             candidates_cards = []
                             for player in self.player_list:
                                 if player.status == 1:
-                                    candidates_hand.append(player.show_hand())
+                                    # candidates_hand.append(player.show_hand())
                                     candidates_name.append(player.name)
                                     candidates_cards.append(player.show_best_hand())        
                             best_hand, best_idx = compare.best_hand(candidates_cards)
@@ -155,8 +148,11 @@ class Game(object):
                                         winner = self.search_player(name)
                                         winner.win_pot(pot_win)
                                         if name != min_name:
-                                            self.all_in_max_pot[name] -= pot_win
-                                            if self.all_in_max_pot[name] > 1:
+                                            if name in self.all_in_max_pot:
+                                                self.all_in_max_pot[name] -= pot_win
+                                                if self.all_in_max_pot[name] > 1:
+                                                    winner.status = 1
+                                            else:
                                                 winner.status = 1
                                     self.pot -= min_side_pot
                                 else: # no one has sidepot
@@ -165,6 +161,21 @@ class Game(object):
                                         winner = self.search_player(candidates_name[i])
                                         winner.win_pot(pot_win)
                                     self.pot = 0
+
+                        # candidates_name = []
+                        # candidates_cards = []
+                        # for player in self.player_list:
+                        #     if player.status == 1:
+                        #         candidates_name.append(player.name)
+                        #         candidates_cards.append(player.show_best_hand())
+                        # compare = CompareHands()
+                        # best_hand, best_idx = compare.best_hand(candidates_cards)
+                        # num_winner = len(best_hand)
+                        # pot_win = math.floor(self.pot/num_winner)
+
+                        # for i in best_idx:
+                        #     winner = self.search_player(candidates_name[i])
+                        #     winner.win_pot(pot_win)
 
         # save log
         self.all_logs[self.game_num] = self.log
@@ -229,10 +240,14 @@ class Game(object):
                 break
 
             # check round bets same
-            round_bets = self.get_round_bets()
-            round_bets.sort()
-            if round_bets[0] == round_bets[-1] and bb_action_flag:
-                round_total_bets = self.get_round_total_bets()
+            round_bets, round_total_bets = self.get_round_bets()
+            max_round_bet = max(round_bets)
+            round_end = True
+            for player in self.player_list:
+                if player.round_bet < max_round_bet and player.all_in == False:
+                    round_end = False
+                    break
+            if round_end and bb_action_flag:
                 pot_before_round = self.pot - round_total_bets
                 for name in self.all_in_players:
                     if name not in self.all_in_max_pot:
@@ -241,10 +256,9 @@ class Game(object):
                         self.all_in_max_pot[name] = pot_before_round+related_round_pot
                 break
             
-            round_bet_target = round_bets[-1]
             player = self.search_player(self.bfo[action_idx])
             if player.status == 1 and player.all_in == False: # player still active and not all in
-                chips_to_call = round_bet_target - player.round_bet
+                chips_to_call = max_round_bet - player.round_bet
                 for i in range(len(self.log_before_flop)-1, -1, -1):
                     log_his = self.log_before_flop[i]
                     if log_his.action == "raise" or log_his.action == "big blind":
@@ -281,7 +295,6 @@ class Game(object):
     def flop(self):
         print("------------Deal flop cards--------------")
         flop_cards = self.croupier.deal_flop() 
-        # print("\tFlop cards are:")
         for card in flop_cards:
             card.show()
         for player in self.player_list:
@@ -291,7 +304,6 @@ class Game(object):
     def turn(self):
         print("------------Deal turn cards--------------")
         turn_card = self.croupier.deal_turn() 
-        # print("\tTurn cards is:")
         turn_card.show()
         for player in self.player_list:
             if player.status == 1:
@@ -300,7 +312,6 @@ class Game(object):
     def river(self):
         print("------------Deal river cards--------------")
         river_card = self.croupier.deal_river() 
-        # print("\tRiver cards is:")
         river_card.show()
         for player in self.player_list:
             if player.status == 1:
@@ -388,10 +399,14 @@ class Game(object):
                 break
 
             # check round bets same
-            round_bets = self.get_round_bets()
-            round_bets.sort()
-            if round_bets[0] == round_bets[-1]:    
-                round_total_bets = self.get_round_total_bets()
+            round_bets, round_total_bets = self.get_round_bets()
+            max_round_bet = max(round_bets)
+            round_end = True
+            for player in self.player_list:
+                if player.round_bet < max_round_bet and player.all_in == False:
+                    round_end = False
+                    break
+            if round_end:    
                 pot_before_round = self.pot - round_total_bets
                 for name in self.all_in_players:
                     if name not in self.all_in_max_pot:
@@ -400,10 +415,9 @@ class Game(object):
                         self.all_in_max_pot[name] = pot_before_round+related_round_pot
                 break
             
-            round_bet_target = round_bets[-1]
             player = self.search_player(self.afo[action_idx])
             if player.status == 1 and player.all_in == False: # player still active and not all in
-                chips_to_call = round_bet_target - player.round_bet
+                chips_to_call = max_round_bet - player.round_bet
                 if stage == "flop":
                     for i in range(len(self.log_flop)-1, -1, -1):
                         log_his = self.log_flop[i]
