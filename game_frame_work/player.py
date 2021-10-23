@@ -1,6 +1,5 @@
 from game_frame_work.deckofcards import Deck
 from game_frame_work.evaluation import Cards7Evaluate
-from policy_of_ai.naive_policy_wly import AlwaysCall, AlwaysFold, AlwaysRaise
 
 class Player(object):
     def __init__(self, name, chips, policy):
@@ -9,6 +8,7 @@ class Player(object):
         self.flop = []
         self.turn = None
         self.river = None
+        self.all_in = False
         self.position = None
         self.sb = 0
         self.bb = 0
@@ -19,7 +19,6 @@ class Player(object):
         self.min_raise = 0
         self.status = 0
         self.seat_num = -1
-        self.join = 0
         self.policy = policy
         self.action_def = {0:"Fold",
                            1:"Check/Call",
@@ -35,12 +34,6 @@ class Player(object):
         print(self.name + "'s position is: " + str(self.position))
         print(self.name + "'s seat number is: " + str(self.seat_num))
         print(self.name + "'s status is: " + str(self.status))
-
-    def join_game_application(self):
-        self.join = 1
-    
-    def leave_game_application(self):
-        self.join = 0
 
     def say_hello(self):
         print("Hi my name is " + self.name)
@@ -133,6 +126,7 @@ class Player(object):
         self.chips_to_call = 0
         self.min_raise = 0
         self.status = 0
+        self.all_in = False
 
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
@@ -157,53 +151,12 @@ class Player(object):
     def your_action(self, chips_to_call, min_raise):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
-
-        if self.policy == 'fold': # AI player always fold
-            policy = AlwaysFold(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'call': # AI player always call
-            policy = AlwaysCall(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'raise': # AI player always raise
-            policy = AlwaysRaise(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'human': # Human player
-            self.show_hand()
-            self.show_log_before_flop()
-            self.show_flop()
-            self.show_log_flop()
-            self.show_turn()
-            self.show_log_turn()
-            self.show_river()
-            self.show_log_river()
-
-            if chips_to_call == 0:
-                action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))
-            else:
-                print(str(chips_to_call) + " chips to call." )
-                action = int(input("Pick actions: 0 for fold, 1 for call, 2 for raise: "))
-            if action == 0:
-                return self.__fold()
-            if action == 1:
-                if self.chips_to_call == 0:
-                    return self.__check()
-                else:
-                    return self.__call()
-            if action == 2:
-                chips_raise = int(input("Min raise is: " + str(self.min_raise) + " Input chips to raise: "))
-                return self.__raise(chips_raise)
+        self.policy.load_attributes(self.name, self.chips, self.__hand, 
+                                    self.flop, self.turn, self.river, 
+                                    self.bfo, self.afo, self.game_log, 
+                                    self.chips_to_call, self.min_raise)
+        action = self.policy.action_should_take()
+        return self.take_action(action)
 
     def get_log(self, log):
         self.game_log = log
@@ -217,6 +170,7 @@ class Player(object):
             self.__hand.append(card)
             self.__all_cards.append(card)
             self.status = 1
+            self.all_in = False
 
     def get_flop(self, cards):
         self.flop = cards
@@ -247,7 +201,7 @@ class Player(object):
         return [1, 0]
 
     def __call(self):
-        if self.chips >= self.chips_to_call:
+        if self.chips > self.chips_to_call:
             self.chips -= self.chips_to_call
             self.status = 1
             # print(self.name + " Call " + str(self.chips_to_call) + " chips")
@@ -256,6 +210,7 @@ class Player(object):
         else:
             call_chips = self.chips
             self.chips = 0
+            self.all_in = True
             self.status = 1
             # print(self.name + " Call " + str(call_chips) + " chips")
             self.round_bet += call_chips
@@ -264,30 +219,16 @@ class Player(object):
     def __raise(self, raise_num):
         if raise_num < self.min_raise:
             raise_num = self.min_raise
-        if self.chips >= raise_num:
+        if self.chips > raise_num:
             self.chips -= raise_num
         else:
             raise_num = self.chips
             self.chips = 0
+            self.all_in = True
         self.status = 1
         # print(self.name + " Raise " + str(raise_num) + " chips")
         self.round_bet += raise_num
         return [2, raise_num]
-
-class ActionLog(object):
-    def __init__(self, name, action, chip_bet, chip_left, pot):
-        self.name = name
-        self.action = action
-        self.chip_bet = chip_bet
-        self.chip_left = chip_left
-        self.pot = pot
-        self.print_log()
-    
-    def print_log(self):
-        if self.action == "call" or self.action == "raise":
-            print("\t" + self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
-        else:
-            print("\t" + self.name + " " + self.action + "\tPot has: " + str(self.pot))
 
 
 if __name__ == '__main__': 
