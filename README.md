@@ -47,7 +47,7 @@ You can figure out the postion by 'my_name', 'bfo', and 'afo'.
 Information in the 11 attributes is all you need to know and legal to know to make an action, according to the game rule. Good luck!
 
 ## Game log definition
-First, a ActionLog class is defined in file 'game_frame_work/player.py'. The attributes are:
+First, a ActionLog class is defined in file 'game_frame_work/game.py'. The attributes are:
 - 'name' is the name who take action. It is a string.
 - 'action' is the action taken. It is a string and may be "fold", "check", "call", and "raise".
 - 'chip_bet ' is how much chips the player bet to the pot. It is a number.

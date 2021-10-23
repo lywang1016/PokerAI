@@ -1,7 +1,23 @@
 import math
 from game_frame_work.evaluation import CompareHands
-from game_frame_work.player import ActionLog
+# from game_frame_work.player import ActionLog
 from game_frame_work.croupier import Croupier
+
+class ActionLog(object):
+    def __init__(self, name, action, chip_bet, chip_left, pot):
+        self.name = name
+        self.action = action
+        self.chip_bet = chip_bet
+        self.chip_left = chip_left
+        self.pot = pot
+        self.print_log()
+    
+    def print_log(self):
+        if self.action == "call" or self.action == "raise":
+            print("\t" + self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
+        else:
+            print("\t" + self.name + " " + self.action + "\tPot has: " + str(self.pot))
+
 
 class Game(object):
     def __init__(self, sb, bb, max_player_num):
