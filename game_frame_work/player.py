@@ -1,6 +1,5 @@
 from game_frame_work.deckofcards import Deck
 from game_frame_work.evaluation import Cards7Evaluate
-from policy_of_ai.naive_policy_wly import AlwaysCall, AlwaysFold, AlwaysRaise
 
 class Player(object):
     def __init__(self, name, chips, policy):
@@ -157,53 +156,12 @@ class Player(object):
     def your_action(self, chips_to_call, min_raise):
         self.chips_to_call = chips_to_call
         self.min_raise = min_raise
-
-        if self.policy == 'fold': # AI player always fold
-            policy = AlwaysFold(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'call': # AI player always call
-            policy = AlwaysCall(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'raise': # AI player always raise
-            policy = AlwaysRaise(self.name, self.chips, self.__hand, 
-                                self.flop, self.turn, self.river, 
-                                self.bfo, self.afo, self.game_log, 
-                                self.chips_to_call, self.min_raise)
-            action = policy.action_should_take()
-            return self.take_action(action)
-        if self.policy == 'human': # Human player
-            self.show_hand()
-            self.show_log_before_flop()
-            self.show_flop()
-            self.show_log_flop()
-            self.show_turn()
-            self.show_log_turn()
-            self.show_river()
-            self.show_log_river()
-
-            if chips_to_call == 0:
-                action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))
-            else:
-                print(str(chips_to_call) + " chips to call." )
-                action = int(input("Pick actions: 0 for fold, 1 for call, 2 for raise: "))
-            if action == 0:
-                return self.__fold()
-            if action == 1:
-                if self.chips_to_call == 0:
-                    return self.__check()
-                else:
-                    return self.__call()
-            if action == 2:
-                chips_raise = int(input("Min raise is: " + str(self.min_raise) + " Input chips to raise: "))
-                return self.__raise(chips_raise)
+        self.policy.load_attributes(self.name, self.chips, self.__hand, 
+                                    self.flop, self.turn, self.river, 
+                                    self.bfo, self.afo, self.game_log, 
+                                    self.chips_to_call, self.min_raise)
+        action = self.policy.action_should_take()
+        return self.take_action(action)
 
     def get_log(self, log):
         self.game_log = log
