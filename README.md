@@ -76,8 +76,8 @@ In the created file, please create subclass of class Strategy defined in 'strate
 
 ## Todo list
 ### Framework
-- Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project target on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)
+- Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project targets on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)
 
 ### AI developent
 - Maybe can find some method in common and implement first.
-- A rule based AI as baseline
+- A rule based AI as baseline.
