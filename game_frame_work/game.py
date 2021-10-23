@@ -1,6 +1,5 @@
 import math
 from game_frame_work.evaluation import CompareHands
-# from game_frame_work.player import ActionLog
 from game_frame_work.croupier import Croupier
 
 class ActionLog(object):
