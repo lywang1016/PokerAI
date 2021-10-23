@@ -227,7 +227,7 @@ class CompareHands(object):
     ################################################################
     def best_hand(self, hand_list):
         if len(hand_list) < 2:
-            return hand_list
+            return hand_list, [0]
 
         res = [hand_list[0]]
         res_idx = [0]
