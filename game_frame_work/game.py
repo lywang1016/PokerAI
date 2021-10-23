@@ -244,7 +244,7 @@ class Game(object):
             max_round_bet = max(round_bets)
             round_end = True
             for player in self.player_list:
-                if player.round_bet < max_round_bet and player.all_in == False:
+                if player.status == 1 and player.round_bet < max_round_bet and player.all_in == False:
                     round_end = False
                     break
             if round_end and bb_action_flag:
@@ -403,7 +403,7 @@ class Game(object):
             max_round_bet = max(round_bets)
             round_end = True
             for player in self.player_list:
-                if player.round_bet < max_round_bet and player.all_in == False:
+                if player.status == 1 and player.round_bet < max_round_bet and player.all_in == False:
                     round_end = False
                     break
             if round_end:    
