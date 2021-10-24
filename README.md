@@ -74,6 +74,9 @@ To implement your own strategy, please first creat a file in 'policy_of_ai' fold
 
 In the created file, please create subclass of class Strategy defined in 'strategy.py' and implement your own algorithm to method 'action_should_take()'.
 
+## Simple GUI
+Now there is a simple GUI just for human player. If use human strategy, for each action the human hand cards and public cards will be displayed. The game log infomation still in terminal. And the human action still taken use terminal inputs. You need to install 'matplotlib' for the simple GUI.
+
 ## Todo list
 ### Framework
 - Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project targets on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)
