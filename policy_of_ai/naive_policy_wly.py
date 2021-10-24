@@ -84,7 +84,7 @@ class Human(Strategy):
 
     def action_should_take(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print('++++++++++++++++++++++++++++++++++++++++++++++++++')
+        print('+++++++++++++++++++++ Game Logs +++++++++++++++++++++')
         self.show_hand()
         self.show_log_before_flop()
         self.show_flop()
