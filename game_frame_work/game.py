@@ -125,6 +125,9 @@ class Game(object):
                                     pot_win = self.all_in_max_pot[name] 
                                     winner.win_pot(pot_win)
                                     self.pot -= pot_win
+                                    for others in self.all_in_max_pot:
+                                        if others != name:
+                                            self.all_in_max_pot[others] -= pot_win
                                 else:
                                     winner.win_pot(self.pot)
                                     self.pot = 0
@@ -226,16 +229,21 @@ class Game(object):
         bb_action_flag = False
         while True:
             # check players left
+            has_chip_num = 0
             active_num = 0
             active_name = ' '
             for player in self.player_list:
                 if player.status == 1:
                     active_name = player.name
                     active_num += 1
+                    if player.chips > 0:
+                        has_chip_num += 1
             if active_num == 1: # game over
                 winner = self.search_player(active_name)
                 winner.win_pot(self.pot)
                 self.winner_get = True
+                break
+            if has_chip_num < 2:
                 break
 
             # check round bets same
@@ -329,6 +337,24 @@ class Game(object):
         action_idx = -2
 
         for i in range(len(self.afo)):
+            # check players left
+            has_chip_num = 0
+            active_num = 0
+            active_name = ' '
+            for player in self.player_list:
+                if player.status == 1:
+                    active_name = player.name
+                    active_num += 1
+                    if player.chips > 0:
+                        has_chip_num += 1
+            if active_num == 1: # game over
+                winner = self.search_player(active_name)
+                winner.win_pot(self.pot)
+                self.winner_get = True
+                break
+            if has_chip_num < 2:
+                break
+
             name = self.afo[i]
             player = self.search_player(name)
             if player.status == 1 and player.all_in == False: # player still active and not all in
@@ -385,16 +411,21 @@ class Game(object):
                 action_idx = 0
 
             # check players left
+            has_chip_num = 0
             active_num = 0
             active_name = ' '
             for player in self.player_list:
                 if player.status == 1:
                     active_name = player.name
                     active_num += 1
+                    if player.chips > 0:
+                        has_chip_num += 1
             if active_num == 1: # game over
                 winner = self.search_player(active_name)
                 winner.win_pot(self.pot)
                 self.winner_get = True
+                break
+            if has_chip_num < 2:
                 break
 
             # check round bets same

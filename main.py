@@ -21,21 +21,18 @@ if __name__ == '__main__':
     ## Init players
     human_player = Player("wly", 50, human_strategy)
     ai_player1 = Player("bot1", 50, fold_strategy)
-    ai_player2 = Player("bot2", 50, call_strategy)
-    ai_player3 = Player("bot3", 60, raise_strategy)
+    ai_player2 = Player("bot2", 30, call_strategy)
+    ai_player3 = Player("bot3", 70, raise_strategy)
     ai_player4 = Player("bot4", 30, call_strategy)
 
     ## Player join game
     game.host_player(human_player)
-    game.host_player(ai_player1)
-    game.host_player(ai_player2)
+    # game.host_player(ai_player1)
+    # game.host_player(ai_player2)
     game.host_player(ai_player3)
-    # game.host_player(ai_player4)
+    game.host_player(ai_player4)
 
     ## Start 1 game
-    game.start_1_game()
-    game.start_1_game()
-    game.start_1_game()
     game.start_1_game()
 
     ## Start 100 game
