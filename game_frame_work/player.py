@@ -217,18 +217,22 @@ class Player(object):
             return [1, call_chips]
 
     def __raise(self, raise_num):
+        real_raise_num = 0
         if raise_num < self.min_raise:
-            raise_num = self.min_raise
-        if self.chips > raise_num:
-            self.chips -= raise_num
+            real_raise_num = self.min_raise
         else:
-            raise_num = self.chips
+            real_raise_num = raise_num
+
+        if self.chips > real_raise_num:
+            self.chips -= real_raise_num
+        else:
+            real_raise_num = self.chips
             self.chips = 0
             self.all_in = True
         self.status = 1
         # print(self.name + " Raise " + str(raise_num) + " chips")
         self.round_bet += raise_num
-        return [2, raise_num]
+        return [2, real_raise_num]
 
 
 if __name__ == '__main__': 
