@@ -1,4 +1,5 @@
 from policy_of_ai.strategy import Strategy
+from simple_gui.card_plot import SimpleGUI
 
 class AlwaysFold(Strategy):
     def __init__(self):
@@ -24,27 +25,34 @@ class AlwaysRaise(Strategy):
 class Human(Strategy):
     def __init__(self):
         super(Human, self).__init__()
+        self.display = SimpleGUI()
 
     def show_hand(self):
-        print(self.my_name + "'s hand cards are:")
-        for card in self.hand:
-            card.show()
+        # print(self.my_name + "'s hand cards are:")
+        # for card in self.hand:
+        #     card.show()
+        if len(self.flop) == 0:
+            self.display.clear_display()
+        self.display.display_hand(self.hand)
 
     def show_flop(self):
         if len(self.flop) > 0:
-            print("Flop cards are:")
-            for card in self.flop:
-                card.show()
+            # print("Flop cards are:")
+            # for card in self.flop:
+            #     card.show()
+            self.display.display_flop(self.flop)
 
     def show_turn(self):
         if self.turn != None:
-            print("Turn card is:")
-            self.turn.show()
+            # print("Turn card is:")
+            # self.turn.show()
+            self.display.display_turn(self.turn)
 
     def show_river(self):
         if self.river != None:
-            print("River card is:")
-            self.river.show()
+            # print("River card is:")
+            # self.river.show()
+            self.display.display_river(self.river)
 
     def show_log_before_flop(self):
         if len(self.game_log[0]) > 0:
@@ -74,6 +82,7 @@ class Human(Strategy):
         print(self.my_name + " have " + str(self.chips) + " chips")
 
     def action_should_take(self):
+        print('+++++++++++++++++++++ Game Logs +++++++++++++++++++++')
         self.show_hand()
         self.show_log_before_flop()
         self.show_flop()
