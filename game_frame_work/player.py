@@ -230,9 +230,10 @@ class Player(object):
             self.chips = 0
             self.all_in = True
         self.status = 1
-        # print(self.name + " Raise " + str(raise_num) + " chips")
-        self.round_bet += raise_num
+        # print(self.name + " Raise " + str(real_raise_num) + " chips")
+        self.round_bet += real_raise_num
         return [2, real_raise_num]
+
 
 
 if __name__ == '__main__': 
