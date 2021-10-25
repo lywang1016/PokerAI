@@ -1,6 +1,5 @@
 from policy_of_ai.strategy import Strategy
 from simple_gui.card_plot import SimpleGUI
-import os
 
 class AlwaysFold(Strategy):
     def __init__(self):
@@ -83,7 +82,6 @@ class Human(Strategy):
         print(self.my_name + " have " + str(self.chips) + " chips")
 
     def action_should_take(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
         print('+++++++++++++++++++++ Game Logs +++++++++++++++++++++')
         self.show_hand()
         self.show_log_before_flop()

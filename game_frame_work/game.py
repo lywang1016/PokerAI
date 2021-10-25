@@ -52,9 +52,14 @@ class Game(object):
             self.croupier.drop_player(player)
 
     def kick_player_no_chip(self):
-        for player in self.player_list:
-            if player.chips < self.bb + self.sb:
-                self.kick_player(player)
+        kick_flag = True
+        while kick_flag:
+            kick_flag = False
+            for player in self.player_list:
+                if player.chips < self.bb + self.sb:
+                    self.kick_player(player)
+                    print("Player " + player.name + " is kicked out!")
+                    kick_flag = True
 
     def search_player(self, name):
         for player in self.player_list:
@@ -229,21 +234,16 @@ class Game(object):
         bb_action_flag = False
         while True:
             # check players left
-            has_chip_num = 0
             active_num = 0
             active_name = ' '
             for player in self.player_list:
                 if player.status == 1:
                     active_name = player.name
                     active_num += 1
-                    if player.chips > 0:
-                        has_chip_num += 1
             if active_num == 1: # game over
                 winner = self.search_player(active_name)
                 winner.win_pot(self.pot)
                 self.winner_get = True
-                break
-            if has_chip_num < 2:
                 break
 
             # check round bets same
@@ -259,7 +259,12 @@ class Game(object):
                 for name in self.all_in_players:
                     if name not in self.all_in_max_pot:
                         player = self.search_player(name)
-                        related_round_pot = player.round_bet * active_num
+                        related_round_pot = 0
+                        for val in round_bets:
+                            if val <= player.round_bet:
+                                related_round_pot += val
+                            else:
+                                related_round_pot += player.round_bet
                         self.all_in_max_pot[name] = pot_before_round+related_round_pot
                 break
             
@@ -338,21 +343,16 @@ class Game(object):
 
         for i in range(len(self.afo)):
             # check players left
-            has_chip_num = 0
             active_num = 0
             active_name = ' '
             for player in self.player_list:
                 if player.status == 1:
                     active_name = player.name
                     active_num += 1
-                    if player.chips > 0:
-                        has_chip_num += 1
             if active_num == 1: # game over
                 winner = self.search_player(active_name)
                 winner.win_pot(self.pot)
                 self.winner_get = True
-                break
-            if has_chip_num < 2:
                 break
 
             name = self.afo[i]
@@ -411,21 +411,16 @@ class Game(object):
                 action_idx = 0
 
             # check players left
-            has_chip_num = 0
             active_num = 0
             active_name = ' '
             for player in self.player_list:
                 if player.status == 1:
                     active_name = player.name
                     active_num += 1
-                    if player.chips > 0:
-                        has_chip_num += 1
             if active_num == 1: # game over
                 winner = self.search_player(active_name)
                 winner.win_pot(self.pot)
                 self.winner_get = True
-                break
-            if has_chip_num < 2:
                 break
 
             # check round bets same
@@ -441,7 +436,12 @@ class Game(object):
                 for name in self.all_in_players:
                     if name not in self.all_in_max_pot:
                         player = self.search_player(name)
-                        related_round_pot = player.round_bet * active_num
+                        related_round_pot = 0
+                        for val in round_bets:
+                            if val <= player.round_bet:
+                                related_round_pot += val
+                            else:
+                                related_round_pot += player.round_bet
                         self.all_in_max_pot[name] = pot_before_round+related_round_pot
                 break
             
