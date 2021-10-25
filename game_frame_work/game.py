@@ -13,9 +13,9 @@ class ActionLog(object):
     
     def print_log(self):
         if self.action == "call" or self.action == "raise":
-            print("\t" + self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot))
+            print("\t" + self.name + " " + self.action + " " + str(self.chip_bet) + "\tPot has: " + str(self.pot) + "\t" + self.name + " has: " + str(self.chip_left) + " left.")
         else:
-            print("\t" + self.name + " " + self.action + "\tPot has: " + str(self.pot))
+            print("\t" + self.name + " " + self.action + "\tPot has: " + str(self.pot) + "\t" + self.name + " has: " + str(self.chip_left) + " left.")
 
 
 class Game(object):
