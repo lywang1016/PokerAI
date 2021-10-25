@@ -19,11 +19,15 @@ if __name__ == '__main__':
     human_strategy = Human()
 
     ## Init players
-    human_player = Player("wly", 20, human_strategy)
-    ai_player1 = Player("bot1", 0, fold_strategy)
-    ai_player2 = Player("bot2", 0, call_strategy)
+    human_player = Player("wly", 0, human_strategy)
+    ai_player1 = Player("bot1", 50, fold_strategy)
+    ai_player2 = Player("bot2", 50, call_strategy)
     ai_player3 = Player("bot3", 70, raise_strategy)
     ai_player4 = Player("bot4", 30, call_strategy)
+    ai_player5 = Player("bot5", 50, raise_strategy)
+    ai_player6 = Player("bot6", 50, call_strategy)
+    ai_player7 = Player("bot7", 70, raise_strategy)
+    ai_player8 = Player("bot8", 30, call_strategy)
 
     ## Player join game
     game.host_player(human_player)
@@ -31,6 +35,10 @@ if __name__ == '__main__':
     game.host_player(ai_player2)
     game.host_player(ai_player3)
     game.host_player(ai_player4)
+    game.host_player(ai_player5)
+    game.host_player(ai_player6)
+    game.host_player(ai_player7)
+    game.host_player(ai_player8)
 
     ## Start 1 game
     # game.start_1_game()
@@ -57,5 +65,9 @@ if __name__ == '__main__':
         ai_player2.show_chips()
         ai_player3.show_chips()
         ai_player4.show_chips()
+        ai_player5.show_chips()
+        ai_player6.show_chips()
+        ai_player7.show_chips()
+        ai_player8.show_chips()
 
     

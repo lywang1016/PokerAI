@@ -112,7 +112,6 @@ class Player(object):
         self.round_bet = 0
 
     def return_cards(self):
-        # self.show_hand()
         self.__hand = []
         self.__all_cards = []
         self.game_log = []
@@ -191,30 +190,25 @@ class Player(object):
     def __fold(self):
         self.__hand = []
         self.status = 0
-        # print(self.name + " Fold")
         self.round_bet = 0
         return [0, 0]
     
     def __check(self):
         self.status = 1
-        # print(self.name + " Check")
         return [1, 0]
 
     def __call(self):
+        call_chips = 0
         if self.chips > self.chips_to_call:
-            self.chips -= self.chips_to_call
-            self.status = 1
-            # print(self.name + " Call " + str(self.chips_to_call) + " chips")
-            self.round_bet += self.chips_to_call
-            return [1, self.chips_to_call]
+            call_chips = self.chips_to_call
+            self.chips -= call_chips
         else:
             call_chips = self.chips
             self.chips = 0
             self.all_in = True
-            self.status = 1
-            # print(self.name + " Call " + str(call_chips) + " chips")
-            self.round_bet += call_chips
-            return [1, call_chips]
+        self.status = 1
+        self.round_bet += call_chips
+        return [1, call_chips]
 
     def __raise(self, raise_num):
         real_raise_num = 0
@@ -230,7 +224,6 @@ class Player(object):
             self.chips = 0
             self.all_in = True
         self.status = 1
-        # print(self.name + " Raise " + str(real_raise_num) + " chips")
         self.round_bet += real_raise_num
         return [2, real_raise_num]
 
