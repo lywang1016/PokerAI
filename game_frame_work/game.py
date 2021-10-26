@@ -133,6 +133,8 @@ class Game(object):
                                     for others in self.all_in_max_pot:
                                         if others != name:
                                             self.all_in_max_pot[others] -= pot_win
+                                            if self.all_in_max_pot[others] < 1:
+                                                self.all_in_max_pot[others] = 0
                                 else:
                                     winner.win_pot(self.pot)
                                     self.pot = 0
@@ -159,6 +161,8 @@ class Game(object):
                                                 self.all_in_max_pot[name] -= pot_win
                                                 if self.all_in_max_pot[name] > 1:
                                                     winner.status = 1
+                                                else:
+                                                    self.all_in_max_pot[name] = 0
                                             else:
                                                 winner.status = 1
                                     self.pot -= min_side_pot
