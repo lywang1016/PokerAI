@@ -20,7 +20,11 @@ class RuleBased1V1(Strategy):
     def hand_card_encode(self):
         if self.hand != None:
             val1 = self.hand[0].value
+            if val1 > 13:
+                val1 = 1
             val2 = self.hand[1].value
+            if val2 > 13:
+                val2 = 1
             suit1 = self.hand[0].suit
             suit2 = self.hand[1].suit
             return [min(val1, val2), max(val1, val2), int(suit1==suit2)]
@@ -35,5 +39,73 @@ class RuleBased1V1(Strategy):
                     return power
         return 0
 
+    def before_flop_action_should_take(self):
+        # print("Bot have :")
+        # for card in self.hand:
+        #     card.show()
+
+        power = self.hand_card_power()
+        # print("Bot hand power is " + str(power))
+
+        if power == 0:
+            if self.chips_to_call == 0:
+                return [1, 0] # check
+            else:
+                return [0, 0] # fold
+        elif power == 1:
+            if self.chips_to_call == 0:
+                return [1, 0] # check
+            else:
+                call_pow = self.chips_to_call / self.bb
+                if call_pow > 3:
+                    return [0, 0] # fold
+                else:
+                    return [1, self.chips_to_call] # call
+        elif power == 2:
+            if self.chips_to_call == 0:
+                return [1, 0] # check
+            else:
+                call_pow = self.chips_to_call / self.bb
+                if call_pow > 9:
+                    return [0, 0] # fold
+                else:
+                    return [1, self.chips_to_call] # call
+        elif power == 3:
+            return [1, self.chips_to_call] # check/call
+        elif power == 4:
+            last_log = self.game_log[0][-1]
+            pot = last_log.pot
+            if self.chips_to_call > 12*self.bb:
+                return [1, self.chips_to_call] # call
+            else:
+                return [2, max(3*self.min_raise, int(0.8*pot))] # raise
+        elif power == 5:
+            last_log = self.game_log[0][-1]
+            pot = last_log.pot
+            opponent_chip = last_log.chip_left
+            bet = min(4*self.min_raise, int(5*pot), opponent_chip)
+            if bet <= self.chips_to_call:
+                return [1, self.chips_to_call] # call
+            else:
+                return [2, bet] # raise
+        else: # error happen, suppose not happen! just fold
+            return [0, 0] # fold
+
+    def flop_action_should_take(self):
+        return [1, self.chips_to_call]
+
+    def turn_action_should_take(self):
+        return [1, self.chips_to_call]
+
+    def river_action_should_take(self):
+        return [1, self.chips_to_call]
+
     def action_should_take(self):
-        return [0, 0]
+        if len(self.flop) == 0: # Before flop
+            return self.before_flop_action_should_take()
+        elif self.turn == None: # Flop
+            return self.flop_action_should_take()
+        elif self.river == None: # Turn
+            return self.turn_action_should_take()
+        else:                     # River
+            return self.river_action_should_take()

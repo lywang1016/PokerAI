@@ -155,7 +155,8 @@ class Game(object):
                                     for i in best_idx:
                                         name = candidates_name[i]
                                         winner = self.search_player(name)
-                                        winner.win_pot(pot_win)
+                                        winner.win_pot(pot_win) 
+                                        self.pot -= pot_win
                                         if name != min_name:
                                             if name in self.all_in_max_pot:
                                                 self.all_in_max_pot[name] -= pot_win
@@ -165,28 +166,12 @@ class Game(object):
                                                     self.all_in_max_pot[name] = 0
                                             else:
                                                 winner.status = 1
-                                    self.pot -= min_side_pot
                                 else: # no one has sidepot
                                     pot_win = math.floor(self.pot/num_winner)
                                     for i in best_idx:
                                         winner = self.search_player(candidates_name[i])
                                         winner.win_pot(pot_win)
-                                    self.pot = 0
-
-                        # candidates_name = []
-                        # candidates_cards = []
-                        # for player in self.player_list:
-                        #     if player.status == 1:
-                        #         candidates_name.append(player.name)
-                        #         candidates_cards.append(player.show_best_hand())
-                        # compare = CompareHands()
-                        # best_hand, best_idx = compare.best_hand(candidates_cards)
-                        # num_winner = len(best_hand)
-                        # pot_win = math.floor(self.pot/num_winner)
-
-                        # for i in best_idx:
-                        #     winner = self.search_player(candidates_name[i])
-                        #     winner.win_pot(pot_win)
+                                        self.pot -= pot_win
 
         # save log
         self.all_logs[self.game_num] = self.log
