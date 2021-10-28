@@ -173,24 +173,28 @@ class RuleBased1V1(Strategy):
         return final_res
 
     def before_flop_action_should_take(self):
-        # print("Bot have :")
-        # for card in self.hand:
-        #     card.show()
+        print("Bot have :")
+        for card in self.hand:
+            card.show()
 
         power = self.my_hand_card_power()
-        # print("Bot hand power is " + str(power))
+        print("Bot hand power is " + str(power))
 
         if power == 0:
             if self.chips_to_call == 0:
                 return [1, 0] # check
             else:
-                return [0, 0] # fold
+                call_pow = self.chips_to_call / self.bb
+                if call_pow > 2:
+                    return [0, 0] # fold
+                else:
+                    return [1, self.chips_to_call] # call min raise 
         elif power == 1:
             if self.chips_to_call == 0:
                 return [1, 0] # check
             else:
                 call_pow = self.chips_to_call / self.bb
-                if call_pow > 5:
+                if call_pow > 6:
                     return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call
@@ -204,7 +208,11 @@ class RuleBased1V1(Strategy):
                 else:
                     return [1, self.chips_to_call] # call
         elif power == 3:
-            return [1, self.chips_to_call] # check/call
+            call_pow = self.chips_to_call / self.bb
+            if call_pow < 4:
+                return [2, 4*self.bb] # raise
+            else:
+                return [1, self.chips_to_call] # check/call
         elif power == 4:
             last_log = self.game_log[0][-1]
             pot = last_log.pot
