@@ -1,3 +1,4 @@
+import numpy as np
 from policy_of_ai.strategy import Strategy
 from game_frame_work.deckofcards import Card
 
@@ -182,8 +183,14 @@ class RuleBased1V1(Strategy):
                 return [1, 0] # check
             else:
                 call_pow = self.chips_to_call / self.bb
-                if call_pow > 2:
+                if call_pow > 4:
                     return [0, 0] # fold
+                elif call_pow > 2:
+                    rd = np.random.rand()
+                    if rd < 0.2: # 20 percent call
+                        return [1, self.chips_to_call]
+                    else:
+                        return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call min raise 
         elif power == 1:
@@ -191,8 +198,14 @@ class RuleBased1V1(Strategy):
                 return [1, 0] # check
             else:
                 call_pow = self.chips_to_call / self.bb
-                if call_pow > 6:
+                if call_pow > 8:
                     return [0, 0] # fold
+                elif call_pow > 6:
+                    rd = np.random.rand()
+                    if rd < 0.2: # 20 percent call
+                        return [1, self.chips_to_call]
+                    else:
+                        return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call
         elif power == 2:
@@ -200,14 +213,25 @@ class RuleBased1V1(Strategy):
                 return [1, 0] # check
             else:
                 call_pow = self.chips_to_call / self.bb
-                if call_pow > 10:
+                if call_pow > 12:
                     return [0, 0] # fold
+                elif call_pow > 8:
+                    rd = np.random.rand()
+                    if rd < 0.2: # 20 percent call
+                        return [1, self.chips_to_call]
+                    else:
+                        return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call
         elif power == 3:
             call_pow = self.chips_to_call / self.bb
             if call_pow < 4:
-                return [2, 4*self.bb] # raise
+                rd = np.random.rand()
+                if rd < 0.4: # 40 percent just call
+                    return [1, self.chips_to_call]
+                else:
+                    raise_pow = np.random.randint(low=3, high=6, size=1)
+                    return [2, raise_pow*self.bb] # raise
             else:
                 return [1, self.chips_to_call] # check/call
         elif power == 4:
@@ -216,8 +240,14 @@ class RuleBased1V1(Strategy):
             if self.chips_to_call > 15*self.bb:
                 return [1, self.chips_to_call] # call
             else:
-                return [2, max(3*self.min_raise, int(0.8*pot))] # raise
+                rd = np.random.rand()
+                if rd < 0.2: # 20 percent just call
+                    return [1, self.chips_to_call]
+                else:
+                    return [2, max(3*self.min_raise, int(0.8*pot))] # raise
         elif power == 5:
+            if self.chips <= self.chips_to_call:
+                return [1, self.chips_to_call] # call
             last_log = self.game_log[0][-1]
             pot = last_log.pot
             opponent_chip = last_log.chip_left
