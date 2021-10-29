@@ -171,12 +171,12 @@ class RuleBased1V1(Strategy):
         return final_res
 
     def before_flop_action_should_take(self):
-        print("Bot have :")
-        for card in self.hand:
-            card.show()
+        # print("Bot have :")
+        # for card in self.hand:
+        #     card.show()
 
         power = self.my_hand_card_power()
-        print("Bot hand power is " + str(power))
+        # print("Bot hand power is " + str(power))
 
         if power == 0:
             if self.chips_to_call == 0:

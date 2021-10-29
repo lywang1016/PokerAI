@@ -1,3 +1,4 @@
+from prettytable import PrettyTable
 from policy_of_ai.strategy import Strategy
 from simple_gui.card_plot import SimpleGUI
 
@@ -56,33 +57,45 @@ class Human(Strategy):
 
     def show_log_before_flop(self):
         if len(self.game_log[0]) > 0:
-            print("Log before flop: ")
+            tb = PrettyTable()
+            tb.field_names = ["Player Name", "Player Action", "Chip Bet", "Pot Total", "Player Chips Left"]
+            print("Log Preflop: ")
             for log in self.game_log[0]:
-                log.print_log()
+                tb.add_row([log.name,log.action,log.chip_bet,log.pot,log.chip_left])
+            print(tb)
 
     def show_log_flop(self):
         if len(self.game_log[1]) > 0:
-            print("Log flop: ")
+            tb = PrettyTable()
+            tb.field_names = ["Player Name", "Player Action", "Chip Bet", "Pot Total", "Player Chips Left"]
+            print("Log Flop: ")
             for log in self.game_log[1]:
-                log.print_log()
+                tb.add_row([log.name,log.action,log.chip_bet,log.pot,log.chip_left])
+            print(tb)
 
     def show_log_turn(self):
         if len(self.game_log[2]) > 0:
-            print("Log turn: ")
+            tb = PrettyTable()
+            tb.field_names = ["Player Name", "Player Action", "Chip Bet", "Pot Total", "Player Chips Left"]
+            print("Log Turn: ")
             for log in self.game_log[2]:
-                log.print_log()
+                tb.add_row([log.name,log.action,log.chip_bet,log.pot,log.chip_left])
+            print(tb)
         
     def show_log_river(self):
         if len(self.game_log[3]) > 0:
-            print("Log river: ")
+            tb = PrettyTable()
+            tb.field_names = ["Player Name", "Player Action", "Chip Bet", "Pot Total", "Player Chips Left"]
+            print("Log River: ")
             for log in self.game_log[3]:
-                log.print_log()
+                tb.add_row([log.name,log.action,log.chip_bet,log.pot,log.chip_left])
+            print(tb)
     
     def show_chips(self):
         print(self.my_name + " have " + str(self.chips) + " chips")
 
     def action_should_take(self):
-        print('+++++++++++++++++++++ Game Logs +++++++++++++++++++++')
+        print('++++++++++++++++++++++++++++++++ Game Logs ++++++++++++++++++++++++++++++++')
         self.show_hand()
         self.show_log_before_flop()
         self.show_flop()
