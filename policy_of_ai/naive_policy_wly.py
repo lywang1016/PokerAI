@@ -1,4 +1,5 @@
 from prettytable import PrettyTable
+from icecream import ic
 from policy_of_ai.strategy import Strategy
 from simple_gui.card_plot import SimpleGUI
 
@@ -105,6 +106,15 @@ class Human(Strategy):
         self.show_river()
         self.show_log_river()
         self.show_chips()
+
+        if len(self.flop) == 0: # Preflop
+            ic("Take Preflop Action!")
+        elif self.turn == None: # Flop
+            ic("Take Flop Action!")
+        elif self.river == None: # Turn
+            ic("Take Turn Action!")
+        else:                     # River
+            ic("Take River Action!")
 
         if self.chips_to_call == 0:
             action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))

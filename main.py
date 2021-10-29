@@ -43,18 +43,18 @@ if __name__ == '__main__':
     game.host_player(ai_player8)
 
     ## Start 1 game
-    game.start_1_game()
-    human_player.show_chips()
-    ai_player1.show_chips()
+    # game.start_1_game()
+    # human_player.show_chips()
+    # ai_player1.show_chips()
     # ai_player2.show_chips()
     # ai_player3.show_chips()
     # ai_player4.show_chips()
 
     ## Start 100 game
-    # for i in range(100):
-    #     game.start_1_game()
-    #     human_player.show_chips()
-    #     ai_player1.show_chips()
+    for i in range(2):
+        game.start_1_game()
+        human_player.show_chips()
+        ai_player1.show_chips()
     #     ai_player2.show_chips()
     #     ai_player3.show_chips()
     #     ai_player4.show_chips()
