@@ -141,35 +141,32 @@ class RuleBased1V1(Strategy):
                     res.append(temp)
 
         known_cards = []
-        if len(self.flop) == 0: # Before flop
+        if len(self.hand) != 0:
             known_cards.append(self.hand[0])
             known_cards.append(self.hand[1])
-        elif self.turn == None: # Flop
-            known_cards.append(self.hand[0])
-            known_cards.append(self.hand[1])
+        if len(self.flop) != 0:
             known_cards.append(self.flop[0])
             known_cards.append(self.flop[1])
             known_cards.append(self.flop[2])
-        elif self.river == None: # Turn
-            known_cards.append(self.hand[0])
-            known_cards.append(self.hand[1])
-            known_cards.append(self.flop[0])
-            known_cards.append(self.flop[1])
-            known_cards.append(self.flop[2])
+        if self.turn != None:
             known_cards.append(self.turn)
-        else:                     # River
-            known_cards.append(self.hand[0])
-            known_cards.append(self.hand[1])
-            known_cards.append(self.flop[0])
-            known_cards.append(self.flop[1])
-            known_cards.append(self.flop[2])
-            known_cards.append(self.turn)
+        if self.river != None: 
             known_cards.append(self.river)
 
         final_res = []
         for hand_cards in res:
-            if hand_cards[0] not in known_cards and hand_cards[1] not in known_cards:
+            card1 = hand_cards[0]
+            card2 = hand_cards[1]
+            good_flag = True
+            for i in range(len(known_cards)):
+                known_card = known_cards[i]
+                if card1.value == known_card.value and card1.suit == known_card.suit:
+                    good_flag = False
+                if card2.value == known_card.value and card2.suit == known_card.suit:
+                    good_flag = False
+            if good_flag:
                 final_res.append(hand_cards)
+
         return final_res
 
     def before_flop_action_should_take(self):
@@ -236,16 +233,18 @@ class RuleBased1V1(Strategy):
         powers = self.opponent_hand_card_power()
         opponent_hands = self.opponent_hand_card_pool(powers)
         print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
-        card1 = opponent_hands[0][0]
-        card2 = opponent_hands[0][1]
-        card1.show()
-        card2.show()
         return [1, self.chips_to_call]
 
     def turn_action_should_take(self):
+        powers = self.opponent_hand_card_power()
+        opponent_hands = self.opponent_hand_card_pool(powers)
+        print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
         return [1, self.chips_to_call]
 
     def river_action_should_take(self):
+        powers = self.opponent_hand_card_power()
+        opponent_hands = self.opponent_hand_card_pool(powers)
+        print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
         return [1, self.chips_to_call]
 
     def action_should_take(self):
