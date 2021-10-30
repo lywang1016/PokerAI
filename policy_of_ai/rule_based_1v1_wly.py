@@ -1,6 +1,7 @@
 import numpy as np
 from policy_of_ai.strategy import Strategy
 from game_frame_work.deckofcards import Card
+from game_frame_work.evaluation import Classification
 
 class RuleBased1V1(Strategy):
     def __init__(self):
@@ -96,22 +97,27 @@ class RuleBased1V1(Strategy):
                     return power
         return 0
 
-    def opponent_hand_card_power(self):
+    def preflop_analyze(self):
         # just assume is log before flop is done
+        # return opponent hand power range, opponent range, my range, I open?
         log_before_flop = self.game_log[0]
         if self.my_name == self.bfo[0]: # I'm sb
             log3 = log_before_flop[2] # My action
             log4 = log_before_flop[3]
             if log3.action == 'call':
                 if log4.action == 'raise':
-                    return [2, 3, 4, 5]
+                    return [2,3,4,5], [1,10,11,12,13], \
+                           [6,7,8,9,10,11,12], False
                 else:
-                    return [0, 1, 2]
+                    return [0,1,2], [2,3,4,5,6,7,8,9], \
+                           [2,3,4,5,6,7,8,9], False
             if log3.action == 'raise':
                 if log4.action == 'raise':
-                    return [4, 5]
+                    return [4,5], [1,10,11,12,13], \
+                           [8,9,10,11,12,13,1], False
                 else:
-                    return [2, 3, 4]
+                    return [2,3,4], [6,7,8,9,10,11,12], \
+                           [8,9,10,11,12,13,1], True
         else:                           # I'm bb
             log3 = log_before_flop[2] 
             log4 = log_before_flop[3] # My action
@@ -119,17 +125,26 @@ class RuleBased1V1(Strategy):
                 if log4.action == 'raise':
                     log5 = log_before_flop[4]
                     if log5.action == 'call':
-                        return [1, 2, 3]
-                    else:
-                        return [2, 3]
+                        return [1,2,3], [6,7,8,9,10,11,12], \
+                               [8,9,10,11,12,13,1], True
+                    if log5.action == 'raise':
+                        return [2,3,4], [1,6,7,8,9,10,11,12,13], \
+                               [8,9,10,11,12,13,1], False
                 else:
-                    return [0, 1, 2]
-            if log3.action == 'raise' and log4.action == 'raise':
-                log5 = log_before_flop[4]
-                if log5.action == 'call':
-                    return [3, 4, 5]
-                if log5.action == 'raise':
-                    return [4, 5]
+                    return [0,1,2], [2,3,4,5,6,7,8,9], \
+                           [2,3,4,5,6,7,8,9], False
+            if log3.action == 'raise':
+                if log4.action == 'raise':
+                    log5 = log_before_flop[4]
+                    if log5.action == 'call':
+                        return [3,4,5], [8,9,10,11,12,13,1], \
+                               [8,9,10,11,12,13,1], False
+                    if log5.action == 'raise':
+                        return [4,5], [10,11,12,13,1], \
+                               [10,11,12,13,1], True
+                else:
+                    return [2,3,4,5], [8,9,10,11,12,13,1], \
+                           [6,7,8,9,10,11,12], False
         return [5]
 
     def opponent_hand_card_pool(self, powers):
@@ -170,7 +185,7 @@ class RuleBased1V1(Strategy):
 
         return final_res
 
-    def before_flop_action_should_take(self):
+    def preflop_action_should_take(self):
         # print("Bot have :")
         # for card in self.hand:
         #     card.show()
@@ -260,26 +275,143 @@ class RuleBased1V1(Strategy):
             return [0, 0] # fold
 
     def flop_action_should_take(self):
-        powers = self.opponent_hand_card_power()
-        opponent_hands = self.opponent_hand_card_pool(powers)
-        print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
-        return [1, self.chips_to_call]
+        opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
+        opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
+        ev = Classification()
+        card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
+        my_current_power = ev.classify(card5)
+
+        if self.afo[0] == self.my_name: # I take action first
+            if self.chips_to_call == 0: # First action
+                if i_open: # I open in preflop, consider if c-bet
+                    num_my_range = 0
+                    num_opponent_range = 0
+                    for i in range(3):
+                        card = self.flop[i]
+                        if card.value in my_range:
+                            num_my_range += 1
+                        if card.value in opponent_range:
+                            num_opponent_range += 1
+                    current_pot = self.game_log[0][-1].pot
+                    if num_my_range >= num_opponent_range: # c-bet, estimate a bet value
+                        return [2, int(0.35*current_pot)]
+                    else: # 50 percent c-bet
+                        rd = np.random.rand()
+                        if rd > 0.5:
+                            return [2, int(0.3*current_pot)]
+                        else:
+                            return [1, self.chips_to_call]
+                else: # I didn't open, just check
+                    return [1, self.chips_to_call]
+            else: # I action, opponent raise, now my turn, consider call or fold
+                if i_open: # I open in preflop
+                    if my_current_power > 2: # got someting better than two pairs just call
+                        return [1, self.chips_to_call]
+                    else:
+                        num_my_range = 0
+                        num_opponent_range = 0
+                        for i in range(3):
+                            card = self.flop[i]
+                            if card.value in my_range:
+                                num_my_range += 1
+                            if card.value in opponent_range:
+                                num_opponent_range += 1
+                        if num_my_range < num_opponent_range: # 80 percent fold
+                            rd = np.random.rand()
+                            if rd > 0.8:
+                                return [0, 0]
+                            else:
+                                return [1, self.chips_to_call]
+                        else: # just call since I open in preflop
+                            return [1, self.chips_to_call]
+                else: # I didn't open, check my situation
+                    if my_current_power > 1: # got someting better than one pair just call
+                        return [1, self.chips_to_call]
+                    else: # calculate win pob and compare with chip to call
+                        current_pot = self.game_log[1][-1].pot
+                        odds = self.chips_to_call / (self.chips_to_call + current_pot)
+                        win_rate = 0.1 # estimate as 0.1 for now, needs upgrade later
+                        if win_rate > odds:
+                            return [1, self.chips_to_call] # call
+                        else:
+                            return [0, 0] # fold
+        else: # opponent take action first
+            if self.chips_to_call == 0: # opponent check
+                if i_open: # I open in preflop, consider if c-bet
+                    num_my_range = 0
+                    num_opponent_range = 0
+                    for i in range(3):
+                        card = self.flop[i]
+                        if card.value in my_range:
+                            num_my_range += 1
+                        if card.value in opponent_range:
+                            num_opponent_range += 1
+                    current_pot = self.game_log[1][-1].pot
+                    if num_my_range >= num_opponent_range: # c-bet, estimate a bet value
+                        return [2, int(0.35*current_pot)]
+                    else: # 50 percent c-bet
+                        rd = np.random.rand()
+                        if rd > 0.5:
+                            return [2, int(0.3*current_pot)]
+                        else:
+                            return [1, self.chips_to_call]
+                else: # I didn't open, if got some thing good, 50 percent donk
+                    if my_current_power > 1: # got someting better than one pair
+                        rd = np.random.rand()
+                        if rd > 0.5:
+                            current_pot = self.game_log[1][-1].pot
+                            return [2, int(0.3*current_pot)]
+                        else:
+                            return [1, self.chips_to_call]
+                    else: # check
+                        return [1, self.chips_to_call]
+            else: # opponent raise
+                if i_open: # I open in preflop, and opponent donk
+                    if my_current_power > 2: # got someting better than two pairs, 3-bet
+                        current_pot = self.game_log[1][-1].pot
+                        return [2, int(0.9*current_pot)]
+                    else:
+                        num_my_range = 0
+                        num_opponent_range = 0
+                        for i in range(3):
+                            card = self.flop[i]
+                            if card.value in my_range:
+                                num_my_range += 1
+                            if card.value in opponent_range:
+                                num_opponent_range += 1
+                        if num_my_range < num_opponent_range: # 80 percent fold
+                            rd = np.random.rand()
+                            if rd > 0.8:
+                                return [0, 0]
+                            else:
+                                return [1, self.chips_to_call]
+                        else: # just call since I open in preflop
+                            return [1, self.chips_to_call]
+                else: # I didn't open, consider call or fold
+                    if my_current_power > 1: # got someting better than one pair just call
+                        return [1, self.chips_to_call]
+                    else: # calculate win pob and compare with chip to call
+                        current_pot = self.game_log[1][-1].pot
+                        odds = self.chips_to_call / (self.chips_to_call + current_pot)
+                        win_rate = 0.1 # estimate as 0.1 for now, needs upgrade later
+                        if win_rate > odds:
+                            return [1, self.chips_to_call] # call
+                        else:
+                            return [0, 0] # fold
 
     def turn_action_should_take(self):
-        powers = self.opponent_hand_card_power()
-        opponent_hands = self.opponent_hand_card_pool(powers)
-        print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
+        opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
+        opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
         return [1, self.chips_to_call]
 
     def river_action_should_take(self):
-        powers = self.opponent_hand_card_power()
-        opponent_hands = self.opponent_hand_card_pool(powers)
-        print("opponent_hand_card_pool num: " + str(len(opponent_hands)))
+        opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
+        opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
         return [1, self.chips_to_call]
 
     def action_should_take(self):
         if len(self.flop) == 0: # Before flop
-            return self.before_flop_action_should_take()
+            return self.preflop_action_should_take()
         elif self.turn == None: # Flop
             return self.flop_action_should_take()
         elif self.river == None: # Turn
