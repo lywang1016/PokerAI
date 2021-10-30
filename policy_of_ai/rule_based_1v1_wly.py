@@ -218,24 +218,28 @@ class RuleBased1V1(Strategy):
             
             # deal cards num need to deal
             if deal_num == 2:
-                for i in range(len(cards_left)-1):
-                    for j in range(i+1, len(cards_left)):
-                        case_num += 1
-                        my_all_cards = [self.hand[0],self.hand[1], \
-                                        self.flop[0],self.flop[1],self.flop[2], \
-                                        cards_left[i],cards_left[j]]
-                        op_all_cards = [oc[0],oc[1], \
-                                        self.flop[0],self.flop[1],self.flop[2], \
-                                        cards_left[i],cards_left[j]]
-                        my_evaluate = Cards7Evaluate(my_all_cards)
-                        op_evaluate = Cards7Evaluate(op_all_cards)
-                        list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
-                        best_hand, best_idx = compare.best_hand(list_cards)
-                        if len(best_idx) == 2:
-                            i_win_num += 0.5
-                        else:
-                            if best_idx[0] == 0: # I win
-                                i_win_num += 1
+                # approximate solution
+                case_num = 100
+                i_win_num = 20
+                # # 'accurate' solution, but takes too long
+                # for i in range(len(cards_left)-1):
+                #     for j in range(i+1, len(cards_left)):
+                #         case_num += 1
+                #         my_all_cards = [self.hand[0],self.hand[1], \
+                #                         self.flop[0],self.flop[1],self.flop[2], \
+                #                         cards_left[i],cards_left[j]]
+                #         op_all_cards = [oc[0],oc[1], \
+                #                         self.flop[0],self.flop[1],self.flop[2], \
+                #                         cards_left[i],cards_left[j]]
+                #         my_evaluate = Cards7Evaluate(my_all_cards)
+                #         op_evaluate = Cards7Evaluate(op_all_cards)
+                #         list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
+                #         best_hand, best_idx = compare.best_hand(list_cards)
+                #         if len(best_idx) == 2:
+                #             i_win_num += 0.5
+                #         else:
+                #             if best_idx[0] == 0: # I win
+                #                 i_win_num += 1
             if deal_num == 1:
                 for i in range(len(cards_left)):
                     case_num += 1
@@ -271,7 +275,10 @@ class RuleBased1V1(Strategy):
                 else:
                     if best_idx[0] == 0: # I win
                         i_win_num += 1
-        return float(i_win_num/case_num)
+        if case_num > 0:
+            return float(i_win_num/case_num)
+        else:
+            return 0
 
     def preflop_action_should_take(self):
         # print("Bot have :")
@@ -281,9 +288,24 @@ class RuleBased1V1(Strategy):
         power = self.my_hand_card_power()
         # print("Bot hand power is " + str(power))
 
+        val1 = self.hand[0].value
+        val2 = self.hand[1].value
+        if val1 == 1:
+            val1 = 14
+        if val2 == 1:
+            val2 = 14
+
         if power == 0:
             if self.chips_to_call == 0:
-                return [1, 0] # check
+                rd = np.random.rand()
+                if rd < 0.7: # 70 percent just check
+                    return [1, 0]
+                else: # raise if have big
+                    if val1 > 11 or val2 > 11:
+                        raise_pow = np.random.randint(low=4, high=6, size=1)
+                        return [2, raise_pow*self.bb]
+                    else:
+                        return [1, 0]
             else:
                 call_pow = self.chips_to_call / self.bb
                 if call_pow > 4:
@@ -298,75 +320,131 @@ class RuleBased1V1(Strategy):
                     return [1, self.chips_to_call] # call min raise 
         elif power == 1:
             if self.chips_to_call == 0:
-                return [1, 0] # check
+                rd = np.random.rand()
+                if rd < 0.5: # 50 percent just check
+                    return [1, 0]
+                else: # raise if have big
+                    if val1 > 11 or val2 > 11:
+                        raise_pow = np.random.randint(low=4, high=6, size=1)
+                        return [2, raise_pow*self.bb]
+                    else:
+                        return [1, 0]
             else:
                 call_pow = self.chips_to_call / self.bb
                 if call_pow > 8:
-                    return [0, 0] # fold
-                elif call_pow > 6:
+                    if val1 > 12 or val2 > 12:
+                        return [1, self.chips_to_call]
+                    else:
+                        return [0, 0] # fold
+                elif call_pow > 5:
                     rd = np.random.rand()
                     if rd < 0.2: # 20 percent call
                         return [1, self.chips_to_call]
                     else:
-                        return [0, 0] # fold
+                        if val1 > 11 or val2 > 11:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call
         elif power == 2:
             if self.chips_to_call == 0:
-                return [1, 0] # check
+                rd = np.random.rand()
+                if rd < 0.3: # 30 percent just check
+                    return [1, 0]
+                else: # raise if have big
+                    if val1 > 11 or val2 > 11:
+                        raise_pow = np.random.randint(low=4, high=6, size=1)
+                        return [2, raise_pow*self.bb]
+                    else:
+                        return [1, 0]
             else:
                 call_pow = self.chips_to_call / self.bb
                 if call_pow > 12:
-                    return [0, 0] # fold
+                    if val1 > 12 or val2 > 12:
+                        return [1, self.chips_to_call]
+                    else:
+                        return [0, 0] # fold
                 elif call_pow > 8:
                     rd = np.random.rand()
                     if rd < 0.2: # 20 percent call
                         return [1, self.chips_to_call]
                     else:
-                        return [0, 0] # fold
+                        if val1 > 11 or val2 > 11:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0] # fold
                 else:
                     return [1, self.chips_to_call] # call
         elif power == 3:
             call_pow = self.chips_to_call / self.bb
             if call_pow < 4:
                 rd = np.random.rand()
-                if rd < 0.4: # 40 percent just call
+                if rd < 0.1: # 10 percent just call
                     return [1, self.chips_to_call]
                 else:
-                    raise_pow = np.random.randint(low=3, high=6, size=1)
+                    raise_pow = np.random.randint(low=4, high=6, size=1)
                     return [2, raise_pow*self.bb] # raise
             else:
-                return [1, self.chips_to_call] # check/call
+                if call_pow < 12:
+                    if val1 > 11 or val2 > 11:
+                        return [2, self.min_raise] # raise
+                    else:
+                        return [1, self.chips_to_call] # call
+                else:
+                    return [1, self.chips_to_call] # call
         elif power == 4:
             last_log = self.game_log[0][-1]
             pot = last_log.pot
-            if self.chips_to_call > 15*self.bb:
+            if self.chips_to_call == 0:
+                raise_pow = np.random.randint(low=4, high=6, size=1)
+                return [2, raise_pow*self.bb]
+            elif self.chips_to_call > 20*self.bb:
                 return [1, self.chips_to_call] # call
-            else:
+            elif self.chips_to_call > 10*self.bb:
                 rd = np.random.rand()
-                if rd < 0.2: # 20 percent just call
+                if rd < 0.4: # 40 percent just call
                     return [1, self.chips_to_call]
                 else:
-                    return [2, max(3*self.min_raise, int(0.8*pot))] # raise
+                    return [2, max(2*self.min_raise, int(0.8*pot))] # raise
+            else:
+                rd = np.random.rand()
+                if rd < 0.1: # 10 percent just call
+                    return [1, self.chips_to_call]
+                else:
+                    return [2, max(2*self.min_raise, int(0.8*pot))] # raise
         elif power == 5:
             if self.chips <= self.chips_to_call:
                 return [1, self.chips_to_call] # call
             last_log = self.game_log[0][-1]
             pot = last_log.pot
             opponent_chip = last_log.chip_left
-            bet = min(4*self.min_raise, int(5*pot), opponent_chip)
-            if bet <= self.chips_to_call:
-                return [1, self.chips_to_call] # call
-            else:
-                return [2, bet] # raise
+            if self.chips_to_call == 0:
+                raise_pow = np.random.randint(low=4, high=6, size=1)
+                return [2, raise_pow*self.bb]
+            elif self.chips_to_call > 10*self.bb and self.chips_to_call < 20*self.bb: 
+                rd = np.random.rand()
+                if rd < 0.3: # 30 percent just call
+                    return [1, self.chips_to_call]
+                else:
+                    bet = min(2*self.min_raise, int(5*pot), opponent_chip)
+                    if bet <= self.chips_to_call:
+                        return [1, self.chips_to_call] # call
+                    else:
+                        return [2, bet] # raise
+            else: # raise
+                bet = min(2*self.min_raise, int(5*pot), opponent_chip)
+                if bet <= self.chips_to_call:
+                    return [1, self.chips_to_call] # call
+                else:
+                    return [2, bet] # raise
+
         else: # error happen, suppose not happen! just fold
             return [0, 0] # fold
 
     def flop_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
-        win_rate = self.get_win_rate(opponent_hands)
-        ic(win_rate)
         ev = Classification()
         card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
         my_current_power = ev.classify(card5)
@@ -504,7 +582,7 @@ class RuleBased1V1(Strategy):
         return [1, self.chips_to_call]
 
     def action_should_take(self):
-        if len(self.flop) == 0: # Before flop
+        if len(self.flop) == 0: # Preflop
             return self.preflop_action_should_take()
         elif self.turn == None: # Flop
             return self.flop_action_should_take()
