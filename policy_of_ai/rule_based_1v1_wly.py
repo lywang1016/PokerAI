@@ -185,6 +185,113 @@ class RuleBased1V1(Strategy):
 
         return final_res
 
+    def flop_approximate_win_rate(self, my_current_power, ev):
+        if len(self.flop) > 0:
+            if my_current_power > 6:
+                return 1
+            elif my_current_power == 6:
+                return 0.95
+            elif my_current_power == 5:
+                return 0.9
+            elif my_current_power == 4:
+                return 0.85
+            elif my_current_power == 3:
+                return 0.8
+            elif my_current_power == 2:
+                return 0.751 # call if 3*pot
+            else: # on the way
+                card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
+                outs = []
+                deck = Deck()
+                # kick the cards in known_cards
+                cards_left = []
+                for card in deck.cards:
+                    good_flag = True
+                    for i in range(len(card5)):
+                        known_card = card5[i]
+                        if card.value == known_card.value and card.suit == known_card.suit:
+                            good_flag = False
+                            break
+                    if good_flag:
+                        cards_left.append(card)
+                # deal with wait flush
+                flush_dict = {}
+                for card in card5:
+                    suit = card.suit
+                    if suit not in flush_dict:
+                        flush_dict[suit] = 1
+                    else:
+                        flush_dict[suit] += 1
+                flush_suit = None
+                for suit in flush_dict:
+                    if flush_dict[suit] == 4:
+                        flush_suit = suit
+                if flush_suit != None:
+                    for card in cards_left:
+                        if card.suit == flush_suit:
+                            if card.value == 14:
+                                card.value = 1
+                            outs.append(card)
+                # deal with wait straight
+                for i in range(5):
+                    for card in cards_left:
+                        test_list5 = [card]
+                        for j in range(5):
+                            if i != j:
+                                test_list5.append(card5[j])
+                        if ev.if_straight(test_list5):
+                            flag = True
+                            if card.value == 14:
+                                card.value = 1
+                            for k in range(len(outs)):
+                                if card.value == outs[k].value and card.suit == outs[k].suit:
+                                    flag = False # card already in outs
+                                    break
+                            if flag:
+                                outs.append(card)
+                # deal with wait set
+                if my_current_power == 1:
+                    val1 = self.hand[0].value
+                    val2 = self.hand[1].value
+                    if val1 == 14:
+                        val1 = 1
+                    if val2 == 14:
+                        val2 = 1
+                    fval1 = self.flop[0].value
+                    fval2 = self.flop[1].value
+                    fval3 = self.flop[2].value
+                    if fval1 == 14:
+                        fval1 = 1
+                    if fval2 == 14:
+                        fval2 = 1
+                    if fval3 == 14:
+                        fval3 = 1
+                    target_val = 0
+                    if val1 == val2 or val1 == fval1 or val1 == fval2 or val1 == fval3:
+                        target_val = val1
+                    if val2 == fval1 or val2 == fval2 or val2 == fval3:
+                        target_val = val2
+                    if target_val != 0: # find target val cards in left
+                        for card in cards_left:
+                            if card.value == 14:
+                                card.value = 1
+                            if card.value == target_val:
+                                flag = True
+                                for k in range(len(outs)):
+                                    if card.value == outs[k].value and card.suit == outs[k].suit:
+                                        flag = False # card already in outs
+                                        break
+                                if flag:
+                                    outs.append(card)
+                if len(outs) == 0:
+                    return 0.1
+                else:
+                    for temp in outs:
+                        temp.show()
+                    return float(len(outs)*4/100)
+        else:
+            return 0
+
     def get_win_rate(self, opponent_hands):
         case_num = 0
         i_win_num = 0
@@ -218,28 +325,25 @@ class RuleBased1V1(Strategy):
             
             # deal cards num need to deal
             if deal_num == 2:
-                # approximate solution
-                case_num = 100
-                i_win_num = 20
-                # # 'accurate' solution, but takes too long
-                # for i in range(len(cards_left)-1):
-                #     for j in range(i+1, len(cards_left)):
-                #         case_num += 1
-                #         my_all_cards = [self.hand[0],self.hand[1], \
-                #                         self.flop[0],self.flop[1],self.flop[2], \
-                #                         cards_left[i],cards_left[j]]
-                #         op_all_cards = [oc[0],oc[1], \
-                #                         self.flop[0],self.flop[1],self.flop[2], \
-                #                         cards_left[i],cards_left[j]]
-                #         my_evaluate = Cards7Evaluate(my_all_cards)
-                #         op_evaluate = Cards7Evaluate(op_all_cards)
-                #         list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
-                #         best_hand, best_idx = compare.best_hand(list_cards)
-                #         if len(best_idx) == 2:
-                #             i_win_num += 0.5
-                #         else:
-                #             if best_idx[0] == 0: # I win
-                #                 i_win_num += 1
+                # 'accurate' solution, but takes too long
+                for i in range(len(cards_left)-1):
+                    for j in range(i+1, len(cards_left)):
+                        case_num += 1
+                        my_all_cards = [self.hand[0],self.hand[1], \
+                                        self.flop[0],self.flop[1],self.flop[2], \
+                                        cards_left[i],cards_left[j]]
+                        op_all_cards = [oc[0],oc[1], \
+                                        self.flop[0],self.flop[1],self.flop[2], \
+                                        cards_left[i],cards_left[j]]
+                        my_evaluate = Cards7Evaluate(my_all_cards)
+                        op_evaluate = Cards7Evaluate(op_all_cards)
+                        list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
+                        best_hand, best_idx = compare.best_hand(list_cards)
+                        if len(best_idx) == 2:
+                            i_win_num += 0.5
+                        else:
+                            if best_idx[0] == 0: # I win
+                                i_win_num += 1
             if deal_num == 1:
                 for i in range(len(cards_left)):
                     case_num += 1
@@ -281,12 +385,11 @@ class RuleBased1V1(Strategy):
             return 0
 
     def preflop_action_should_take(self):
-        # print("Bot have :")
-        # for card in self.hand:
-        #     card.show()
+        print("Bot have :")
+        for card in self.hand:
+            card.show()
 
         power = self.my_hand_card_power()
-        # print("Bot hand power is " + str(power))
 
         val1 = self.hand[0].value
         val2 = self.hand[1].value
@@ -303,7 +406,7 @@ class RuleBased1V1(Strategy):
                 else: # raise if have big
                     if val1 > 11 or val2 > 11:
                         raise_pow = np.random.randint(low=4, high=6, size=1)
-                        return [2, raise_pow*self.bb]
+                        return [2, raise_pow[0]*self.bb]
                     else:
                         return [1, 0]
             else:
@@ -326,7 +429,7 @@ class RuleBased1V1(Strategy):
                 else: # raise if have big
                     if val1 > 11 or val2 > 11:
                         raise_pow = np.random.randint(low=4, high=6, size=1)
-                        return [2, raise_pow*self.bb]
+                        return [2, raise_pow[0]*self.bb]
                     else:
                         return [1, 0]
             else:
@@ -355,7 +458,7 @@ class RuleBased1V1(Strategy):
                 else: # raise if have big
                     if val1 > 11 or val2 > 11:
                         raise_pow = np.random.randint(low=4, high=6, size=1)
-                        return [2, raise_pow*self.bb]
+                        return [2, raise_pow[0]*self.bb]
                     else:
                         return [1, 0]
             else:
@@ -384,7 +487,7 @@ class RuleBased1V1(Strategy):
                     return [1, self.chips_to_call]
                 else:
                     raise_pow = np.random.randint(low=4, high=6, size=1)
-                    return [2, raise_pow*self.bb] # raise
+                    return [2, raise_pow[0]*self.bb] # raise
             else:
                 if call_pow < 12:
                     if val1 > 11 or val2 > 11:
@@ -398,7 +501,7 @@ class RuleBased1V1(Strategy):
             pot = last_log.pot
             if self.chips_to_call == 0:
                 raise_pow = np.random.randint(low=4, high=6, size=1)
-                return [2, raise_pow*self.bb]
+                return [2, raise_pow[0]*self.bb]
             elif self.chips_to_call > 20*self.bb:
                 return [1, self.chips_to_call] # call
             elif self.chips_to_call > 10*self.bb:
@@ -421,7 +524,7 @@ class RuleBased1V1(Strategy):
             opponent_chip = last_log.chip_left
             if self.chips_to_call == 0:
                 raise_pow = np.random.randint(low=4, high=6, size=1)
-                return [2, raise_pow*self.bb]
+                return [2, raise_pow[0]*self.bb]
             elif self.chips_to_call > 10*self.bb and self.chips_to_call < 20*self.bb: 
                 rd = np.random.rand()
                 if rd < 0.3: # 30 percent just call
@@ -444,10 +547,11 @@ class RuleBased1V1(Strategy):
 
     def flop_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
-        opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
         ev = Classification()
         card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
         my_current_power = ev.classify(card5)
+        win_rate = self.flop_approximate_win_rate(my_current_power, ev)
+        ic(win_rate)
 
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -498,7 +602,8 @@ class RuleBased1V1(Strategy):
                     else: # calculate win pob and compare with chip to call
                         current_pot = self.game_log[1][-1].pot
                         odds = self.chips_to_call / (self.chips_to_call + current_pot)
-                        win_rate = self.get_win_rate(opponent_hands)
+                        # win_rate = self.get_win_rate(opponent_hands)
+                        win_rate = self.flop_approximate_win_rate(my_current_power, ev)
                         if win_rate > odds:
                             return [1, self.chips_to_call] # call
                         else:
@@ -561,7 +666,8 @@ class RuleBased1V1(Strategy):
                     else: # calculate win pob and compare with chip to call
                         current_pot = self.game_log[1][-1].pot
                         odds = self.chips_to_call / (self.chips_to_call + current_pot)
-                        win_rate = self.get_win_rate(opponent_hands)
+                        # win_rate = self.get_win_rate(opponent_hands)
+                        win_rate = self.flop_approximate_win_rate(my_current_power, ev)
                         if win_rate > odds:
                             return [1, self.chips_to_call] # call
                         else:
@@ -583,10 +689,37 @@ class RuleBased1V1(Strategy):
 
     def action_should_take(self):
         if len(self.flop) == 0: # Preflop
+            for i in range(2):
+                if self.hand[i].value == 14:
+                    self.hand[i].value = 1
             return self.preflop_action_should_take()
         elif self.turn == None: # Flop
+            for i in range(2):
+                if self.hand[i].value == 14:
+                    self.hand[i].value = 1
+            for i in range(3):
+                if self.flop[i].value == 14:
+                    self.flop[i].value = 1
             return self.flop_action_should_take()
         elif self.river == None: # Turn
+            for i in range(2):
+                if self.hand[i].value == 14:
+                    self.hand[i].value = 1
+            for i in range(3):
+                if self.flop[i].value == 14:
+                    self.flop[i].value = 1
+            if self.turn.value == 14:
+                    self.turn.value = 1
             return self.turn_action_should_take()
         else:                     # River
+            for i in range(2):
+                if self.hand[i].value == 14:
+                    self.hand[i].value = 1
+            for i in range(3):
+                if self.flop[i].value == 14:
+                    self.flop[i].value = 1
+            if self.turn.value == 14:
+                    self.turn.value = 1
+            if self.river.value == 14:
+                    self.river.value = 1
             return self.river_action_should_take()
