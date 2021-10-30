@@ -1,7 +1,8 @@
 import numpy as np
+from icecream import ic
 from policy_of_ai.strategy import Strategy
-from game_frame_work.deckofcards import Card
-from game_frame_work.evaluation import Classification
+from game_frame_work.deckofcards import Card, Deck
+from game_frame_work.evaluation import Classification, CompareHands, Cards7Evaluate
 
 class RuleBased1V1(Strategy):
     def __init__(self):
@@ -145,7 +146,6 @@ class RuleBased1V1(Strategy):
                 else:
                     return [2,3,4,5], [8,9,10,11,12,13,1], \
                            [6,7,8,9,10,11,12], False
-        return [5]
 
     def opponent_hand_card_pool(self, powers):
         res = []
@@ -184,6 +184,94 @@ class RuleBased1V1(Strategy):
                 final_res.append(hand_cards)
 
         return final_res
+
+    def get_win_rate(self, opponent_hands):
+        case_num = 0
+        i_win_num = 0
+        compare = CompareHands()
+        for oc in opponent_hands:
+            known_cards = [oc[0],oc[1],self.hand[0],self.hand[1]]
+            deal_num = 5 # how many cards to be deal
+            if len(self.flop) > 0:
+                for i in range(3):
+                    known_cards.append(self.flop[i])
+                deal_num = 2
+            if self.turn != None:
+                known_cards.append(self.turn)
+                deal_num = 1
+            if self.river != None:
+                known_cards.append(self.river)
+                deal_num = 0
+
+            deck = Deck()
+            # kick the cards in known_cards
+            cards_left = []
+            for card in deck.cards:
+                good_flag = True
+                for i in range(len(known_cards)):
+                    known_card = known_cards[i]
+                    if card.value == known_card.value and card.suit == known_card.suit:
+                        good_flag = False
+                        break
+                if good_flag:
+                    cards_left.append(card)
+            
+            # deal cards num need to deal
+            if deal_num == 2:
+                for i in range(len(cards_left)-1):
+                    for j in range(i+1, len(cards_left)):
+                        case_num += 1
+                        my_all_cards = [self.hand[0],self.hand[1], \
+                                        self.flop[0],self.flop[1],self.flop[2], \
+                                        cards_left[i],cards_left[j]]
+                        op_all_cards = [oc[0],oc[1], \
+                                        self.flop[0],self.flop[1],self.flop[2], \
+                                        cards_left[i],cards_left[j]]
+                        my_evaluate = Cards7Evaluate(my_all_cards)
+                        op_evaluate = Cards7Evaluate(op_all_cards)
+                        list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
+                        best_hand, best_idx = compare.best_hand(list_cards)
+                        if len(best_idx) == 2:
+                            i_win_num += 0.5
+                        else:
+                            if best_idx[0] == 0: # I win
+                                i_win_num += 1
+            if deal_num == 1:
+                for i in range(len(cards_left)):
+                    case_num += 1
+                    my_all_cards = [self.hand[0],self.hand[1], \
+                                    self.flop[0],self.flop[1],self.flop[2], \
+                                    cards_left[i],self.turn]
+                    op_all_cards = [oc[0],oc[1], \
+                                    self.flop[0],self.flop[1],self.flop[2], \
+                                    cards_left[i],self.turn]
+                    my_evaluate = Cards7Evaluate(my_all_cards)
+                    op_evaluate = Cards7Evaluate(op_all_cards)
+                    list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
+                    best_hand, best_idx = compare.best_hand(list_cards)
+                    if len(best_idx) == 2:
+                        i_win_num += 0.5
+                    else:
+                        if best_idx[0] == 0: # I win
+                            i_win_num += 1
+            if deal_num == 0:
+                case_num += 1
+                my_all_cards = [self.hand[0],self.hand[1], \
+                                self.flop[0],self.flop[1],self.flop[2], \
+                                self.river,self.turn]
+                op_all_cards = [oc[0],oc[1], \
+                                self.flop[0],self.flop[1],self.flop[2], \
+                                self.river,self.turn]
+                my_evaluate = Cards7Evaluate(my_all_cards)
+                op_evaluate = Cards7Evaluate(op_all_cards)
+                list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
+                best_hand, best_idx = compare.best_hand(list_cards)
+                if len(best_idx) == 2:
+                    i_win_num += 0.5
+                else:
+                    if best_idx[0] == 0: # I win
+                        i_win_num += 1
+        return float(i_win_num/case_num)
 
     def preflop_action_should_take(self):
         # print("Bot have :")
@@ -277,6 +365,8 @@ class RuleBased1V1(Strategy):
     def flop_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
+        win_rate = self.get_win_rate(opponent_hands)
+        ic(win_rate)
         ev = Classification()
         card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
         my_current_power = ev.classify(card5)
@@ -330,7 +420,7 @@ class RuleBased1V1(Strategy):
                     else: # calculate win pob and compare with chip to call
                         current_pot = self.game_log[1][-1].pot
                         odds = self.chips_to_call / (self.chips_to_call + current_pot)
-                        win_rate = 0.1 # estimate as 0.1 for now, needs upgrade later
+                        win_rate = self.get_win_rate(opponent_hands)
                         if win_rate > odds:
                             return [1, self.chips_to_call] # call
                         else:
@@ -393,7 +483,7 @@ class RuleBased1V1(Strategy):
                     else: # calculate win pob and compare with chip to call
                         current_pot = self.game_log[1][-1].pot
                         odds = self.chips_to_call / (self.chips_to_call + current_pot)
-                        win_rate = 0.1 # estimate as 0.1 for now, needs upgrade later
+                        win_rate = self.get_win_rate(opponent_hands)
                         if win_rate > odds:
                             return [1, self.chips_to_call] # call
                         else:
@@ -402,11 +492,15 @@ class RuleBased1V1(Strategy):
     def turn_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
+        win_rate = self.get_win_rate(opponent_hands)
+        ic(win_rate)
         return [1, self.chips_to_call]
 
     def river_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
+        win_rate = self.get_win_rate(opponent_hands)
+        ic(win_rate)
         return [1, self.chips_to_call]
 
     def action_should_take(self):
