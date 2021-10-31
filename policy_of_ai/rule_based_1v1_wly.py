@@ -442,9 +442,9 @@ class RuleBased1V1(Strategy):
         return i_open, op_open, ifist
 
     def preflop_action_should_take(self):
-        # print("Bot have :")
-        # for card in self.hand:
-        #     card.show()
+        ic("Bot have :")
+        for card in self.hand:
+            card.show()
 
         power = self.my_hand_card_power()
 
