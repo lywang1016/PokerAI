@@ -31,6 +31,8 @@ class RuleBased1V1(Strategy):
                                [5,8,1], [5,9,1], [5,10,1], [5,11,1], [5,12,1], [5,13,1], [6,9,0], [6,10,0],
                                [6,11,0], [6,12,0], [6,13,0], [6,10,1], [6,11,1], [6,12,1], [6,13,1], [7,10,0], 
                                [7,11,0], [7,12,0], [7,13,0], [7,11,1], [7,12,1], [7,13,1], [8,12,0], [8,13,0]]}
+        self.turn_win_rate = -1
+        self.river_win_rate = -1
 
     def hand_card_encode(self):
         if self.hand != None:
@@ -97,55 +99,6 @@ class RuleBased1V1(Strategy):
                 if encode in self.hand_power[power]:
                     return power
         return 0
-
-    def preflop_analyze(self):
-        # just assume is log before flop is done
-        # return opponent hand power range, opponent range, my range, I open?
-        log_before_flop = self.game_log[0]
-        if self.my_name == self.bfo[0]: # I'm sb
-            log3 = log_before_flop[2] # My action
-            log4 = log_before_flop[3]
-            if log3.action == 'call':
-                if log4.action == 'raise':
-                    return [2,3,4,5], [1,10,11,12,13], \
-                           [6,7,8,9,10,11,12], False
-                else:
-                    return [0,1,2], [2,3,4,5,6,7,8,9], \
-                           [2,3,4,5,6,7,8,9], False
-            if log3.action == 'raise':
-                if log4.action == 'raise':
-                    return [4,5], [1,10,11,12,13], \
-                           [8,9,10,11,12,13,1], False
-                else:
-                    return [2,3,4], [6,7,8,9,10,11,12], \
-                           [8,9,10,11,12,13,1], True
-        else:                           # I'm bb
-            log3 = log_before_flop[2] 
-            log4 = log_before_flop[3] # My action
-            if log3.action == 'call':
-                if log4.action == 'raise':
-                    log5 = log_before_flop[4]
-                    if log5.action == 'call':
-                        return [1,2,3], [6,7,8,9,10,11,12], \
-                               [8,9,10,11,12,13,1], True
-                    if log5.action == 'raise':
-                        return [2,3,4], [1,6,7,8,9,10,11,12,13], \
-                               [8,9,10,11,12,13,1], False
-                else:
-                    return [0,1,2], [2,3,4,5,6,7,8,9], \
-                           [2,3,4,5,6,7,8,9], False
-            if log3.action == 'raise':
-                if log4.action == 'raise':
-                    log5 = log_before_flop[4]
-                    if log5.action == 'call':
-                        return [3,4,5], [8,9,10,11,12,13,1], \
-                               [8,9,10,11,12,13,1], False
-                    if log5.action == 'raise':
-                        return [4,5], [10,11,12,13,1], \
-                               [10,11,12,13,1], True
-                else:
-                    return [2,3,4,5], [8,9,10,11,12,13,1], \
-                           [6,7,8,9,10,11,12], False
 
     def opponent_hand_card_pool(self, powers):
         res = []
@@ -250,6 +203,7 @@ class RuleBased1V1(Strategy):
                             if flag:
                                 outs.append(card)
                 # deal with other case
+                num_here = 0
                 for i in range(2):
                     target_val = self.hand[i].value
                     if target_val == 14:
@@ -265,10 +219,11 @@ class RuleBased1V1(Strategy):
                                     break
                             if flag:
                                 outs.append(card)
+                                num_here += 1
                 if len(outs) == 0:
                     return 0.1
                 else:
-                    return float(len(outs)*4/100)
+                    return float((len(outs)-0.5*num_here)*4/100)
         else:
             return 0
 
@@ -363,6 +318,128 @@ class RuleBased1V1(Strategy):
             return float(i_win_num/case_num)
         else:
             return 0
+    
+    def public_info(self, stage):
+        idx = 0
+        if stage == "flop":
+            idx = 1
+        if stage == "turn":
+            idx = 2
+        if stage == "river":   
+            idx = 3
+        my_chips_left = 0 # Info
+        op_chips_left = 0 # Info
+        current_pot = 0   # Info
+        if len(self.game_log[idx]) == 0:
+            current_pot = self.game_log[idx-1][-1].pot
+            log1 = self.game_log[idx-1][-1]
+            log2 = self.game_log[idx-1][-2]
+            if log1.name == self.my_name:
+                my_chips_left = log1.chip_left
+                op_chips_left = log2.chip_left
+            else:
+                my_chips_left = log2.chip_left
+                op_chips_left = log1.chip_left
+        else:
+            current_pot = self.game_log[idx][-1].pot
+            if len(self.game_log[idx]) == 1:
+                log1 = self.game_log[idx][0]
+                log2 = self.game_log[idx-1][-1]
+                if log1.name == self.my_name:
+                    my_chips_left = log1.chip_left
+                    op_chips_left = log2.chip_left
+                else:
+                    my_chips_left = log2.chip_left
+                    op_chips_left = log1.chip_left
+            else:
+                log1 = self.game_log[idx][-1]
+                log2 = self.game_log[idx][-2]
+                if log1.name == self.my_name:
+                    my_chips_left = log1.chip_left
+                    op_chips_left = log2.chip_left
+                else:
+                    my_chips_left = log2.chip_left
+                    op_chips_left = log1.chip_left
+        return my_chips_left, op_chips_left, current_pot
+
+    def preflop_analyze(self):
+        # just assume is log before flop is done
+        # return opponent hand power range, opponent range, my range, I open?
+        log_before_flop = self.game_log[0]
+        if self.my_name == self.bfo[0]: # I'm sb
+            log3 = log_before_flop[2] # My action
+            log4 = log_before_flop[3]
+            if log3.action == 'call':
+                if log4.action == 'raise':
+                    return [2,3,4,5], [1,10,11,12,13], \
+                           [6,7,8,9,10,11,12], False
+                else:
+                    return [0,1,2], [2,3,4,5,6,7,8,9], \
+                           [2,3,4,5,6,7,8,9], False
+            if log3.action == 'raise':
+                if log4.action == 'raise':
+                    return [4,5], [1,10,11,12,13], \
+                           [8,9,10,11,12,13,1], False
+                else:
+                    return [2,3,4], [6,7,8,9,10,11,12], \
+                           [8,9,10,11,12,13,1], True
+        else:                           # I'm bb
+            log3 = log_before_flop[2] 
+            log4 = log_before_flop[3] # My action
+            if log3.action == 'call':
+                if log4.action == 'raise':
+                    log5 = log_before_flop[4]
+                    if log5.action == 'call':
+                        return [1,2,3], [6,7,8,9,10,11,12], \
+                               [8,9,10,11,12,13,1], True
+                    if log5.action == 'raise':
+                        return [2,3,4], [1,6,7,8,9,10,11,12,13], \
+                               [8,9,10,11,12,13,1], False
+                else:
+                    return [0,1,2], [2,3,4,5,6,7,8,9], \
+                           [2,3,4,5,6,7,8,9], False
+            if log3.action == 'raise':
+                if log4.action == 'raise':
+                    log5 = log_before_flop[4]
+                    if log5.action == 'call':
+                        return [3,4,5], [8,9,10,11,12,13,1], \
+                               [8,9,10,11,12,13,1], False
+                    if log5.action == 'raise':
+                        return [4,5], [10,11,12,13,1], \
+                               [10,11,12,13,1], True
+                else:
+                    return [2,3,4,5], [8,9,10,11,12,13,1], \
+                           [6,7,8,9,10,11,12], False
+
+    def postflop_analyze(self, stage):
+        # just assume is log is done
+        # return I open? op open? I fist open?
+        idx = 0
+        if stage == 'flop':
+            idx = 1
+        if stage == 'turn':
+            idx = 2
+        log_evaluate = self.game_log[idx]
+        i_open = False
+        op_open = False
+        ifist = False
+        for log in log_evaluate:
+            if log.action == 'raise':
+                if self.my_name == log.name:
+                    i_open = True
+                    ifist = True
+                else:
+                    op_open = True
+                break
+        for i in range(len(log_evaluate)-1, -1, -1):
+            log = log_evaluate[i]
+            if log.action == 'raise':
+                if self.my_name == log.name:
+                    i_open = True
+                else:
+                    op_open = True
+                break
+        return i_open, op_open, ifist
 
     def preflop_action_should_take(self):
         # print("Bot have :")
@@ -530,8 +607,6 @@ class RuleBased1V1(Strategy):
         ev = Classification()
         card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
         my_current_power = ev.classify(card5)
-        # win_rate = self.flop_approximate_win_rate(my_current_power, ev)
-        # ic(win_rate)
 
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -656,15 +731,477 @@ class RuleBased1V1(Strategy):
     def turn_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
-        win_rate = self.get_win_rate(opponent_hands)
-        ic(win_rate)
-        return [1, self.chips_to_call]
+        if self.turn_win_rate < 0:
+            self.turn_win_rate = self.get_win_rate(opponent_hands) # My win rate
+        ic(self.turn_win_rate)
+        op_win_rate = 1 - self.turn_win_rate
+        ev = Classification()
+        card6 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2],self.turn]
+        my_current_power = 0 # My current best
+        for i in range(6):
+            card5 = []
+            for j in range(6):
+                if i != j:
+                    card5.append(card6[j])
+            temp_power = ev.classify(card5)
+            if temp_power > my_current_power:
+                my_current_power = temp_power
+        my_chips_left, op_chips_left, current_pot = self.public_info('turn') # Info
+        flop_i_open, flop_op_open, ifist = self.postflop_analyze('flop') # open info at flop
+        turn_in_my_range = False # Info
+        turn_in_op_range = False # Info
+        for val in my_range:
+            if val == self.turn.value:
+                turn_in_my_range = True
+                break
+        for val in opponent_range:
+            if val == self.turn.value:
+                turn_in_op_range = True
+                break
+
+        value_bet = int(0.9*(op_win_rate/self.turn_win_rate)*current_pot)
+        bluff_bet = int(1.9*(op_win_rate/self.turn_win_rate)*current_pot)
+        
+        if self.afo[0] == self.my_name: # I take action first
+            if self.chips_to_call == 0: # First action
+                if i_open:
+                    if not flop_i_open and not flop_op_open:
+                        if my_current_power > 1 and self.turn_win_rate > 0.5:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [2, bluff_bet]
+                            else:
+                                return [2, value_bet]
+                        else:
+                            return [1, 0] # check
+                    else:
+                        return [1, 0] # check
+                else:
+                    if not flop_i_open and not flop_op_open:
+                        if my_current_power > 1 and self.turn_win_rate > 0.5:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [2, bluff_bet]
+                            else:
+                                return [2, value_bet]
+                        else:
+                            return [1, 0] # check
+                    elif not flop_i_open and flop_op_open:
+                        if my_current_power > 1 and self.turn_win_rate > 0.5:
+                            return [2, value_bet]
+                        else:
+                            return [1, 0] # check
+                    elif flop_i_open and flop_op_open:
+                        if ifist:
+                            return [1, 0] # check
+                        else:
+                            if my_current_power > 1 and self.turn_win_rate > 0.5:
+                                return [2, value_bet]
+                            else:
+                                return [1, 0] # check
+                    else:
+                        return [1, 0] # check
+            else: # I did some thing then op open
+                my_odds = float(self.chips_to_call/(self.chips_to_call+current_pot))
+                my_first_action = self.game_log[2][0].action
+                if my_first_action == 'check':
+                    if i_open:
+                        if not flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.4:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [0, 0] # fold
+                                    else:
+                                        return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate < 0.4:
+                                    return [0, 0] # fold
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.3:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                        elif not flop_i_open and flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.5:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        elif flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.5:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        else:
+                            my_spr = float((my_chips_left-self.chips_to_call)/(current_pot+self.chips_to_call))
+                            if self.turn_win_rate > 0.5:
+                                if my_spr < 2: # all in
+                                    if self.chips_to_call < my_chips_left:
+                                        return [2, my_chips_left]
+                                    else:
+                                        return [1, self.chips_to_call]
+                                else:
+                                    return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate > my_odds:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold 
+                    else:
+                        if not flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.3:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [0, 0] # fold
+                                    else:
+                                        return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate < 0.3:
+                                    return [0, 0] # fold
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.3:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                        elif not flop_i_open and flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.4:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        elif flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.4:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        else:
+                            my_spr = float((my_chips_left-self.chips_to_call)/(current_pot+self.chips_to_call))
+                            if self.turn_win_rate > 0.4:
+                                if my_spr < 2: # all in
+                                    if self.chips_to_call < my_chips_left:
+                                        return [2, my_chips_left]
+                                    else:
+                                        return [1, self.chips_to_call]
+                                else:
+                                    return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate > my_odds:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold 
+                else:
+                    if i_open:
+                        if not flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.5:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [0, 0] # fold
+                                    else:
+                                        return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate < 0.5:
+                                    return [0, 0] # fold
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.3:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                        elif not flop_i_open and flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.6:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        elif flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.6:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        else:
+                            my_spr = float((my_chips_left-self.chips_to_call)/(current_pot+self.chips_to_call))
+                            if self.turn_win_rate > 0.6:
+                                if my_spr < 2: # all in
+                                    if self.chips_to_call < my_chips_left:
+                                        return [2, my_chips_left]
+                                    else:
+                                        return [1, self.chips_to_call]
+                                else:
+                                    return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate > my_odds:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold 
+                    else:
+                        if not flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.4:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [0, 0] # fold
+                                    else:
+                                        return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate < 0.4:
+                                    return [0, 0] # fold
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.3:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                        elif not flop_i_open and flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.5:
+                                    rd = np.random.rand()
+                                    if rd < 0.5:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        elif flop_i_open and not flop_op_open:
+                            if self.turn_win_rate > my_odds:
+                                if self.turn_win_rate > 0.5:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                            else:
+                                return [0, 0] # fold
+                        else:
+                            my_spr = float((my_chips_left-self.chips_to_call)/(current_pot+self.chips_to_call))
+                            if self.turn_win_rate > 0.5:
+                                if my_spr < 2: # all in
+                                    if self.chips_to_call < my_chips_left:
+                                        return [2, my_chips_left]
+                                    else:
+                                        return [1, self.chips_to_call]
+                                else:
+                                    return [1, self.chips_to_call]
+                            else:
+                                if self.turn_win_rate > my_odds:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
+        else: # op take action first
+            if self.chips_to_call == 0: # op check, then my turn
+                if self.turn_win_rate > 0.5:
+                    rd = np.random.rand()
+                    if rd < 0.6: # 60 percent value bet
+                        return [2, value_bet]
+                    else: 
+                        return [2, bluff_bet]
+                else:
+                    if turn_in_my_range and not turn_in_op_range:
+                        rd = np.random.rand()
+                        if rd < 0.2:
+                            return [1, 0]
+                        else: 
+                            return [2, bluff_bet]
+                    else:
+                        rd = np.random.rand()
+                        if rd < 0.8:
+                            return [1, 0]
+                        else: 
+                            return [2, bluff_bet]
+            else: # op raise
+                my_odds = float(self.chips_to_call/(self.chips_to_call+current_pot))
+                if i_open: # more tight
+                    if not flop_i_open and not flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            if my_current_power > 1:    # raise
+                                if my_chips_left <= self.chips_to_call:
+                                    return [1, self.chips_to_call]
+                                bet = int(1.3*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
+                                if bet < my_chips_left:
+                                    return [2, bet]
+                                else:
+                                    return [2, my_chips_left]
+                            else:                       # call
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.7: # 70 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 0:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                    elif not flop_i_open and flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            if not turn_in_my_range and turn_in_op_range:
+                                rd = np.random.rand()
+                                if rd < 0.7: # 70 percent fold
+                                    return [0, 0]
+                                else: 
+                                    return [1, self.chips_to_call]
+                            else:
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.9: # 90 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 0:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                    elif flop_i_open and not flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0]
+                    else:
+                        if self.turn_win_rate > my_odds:
+                            if not turn_in_my_range and turn_in_op_range:
+                                rd = np.random.rand()
+                                if rd < 0.9: # 90 percent fold
+                                    return [0, 0]
+                                else: 
+                                    return [1, self.chips_to_call]
+                            else:
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.7: # 70 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 2:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                else:
+                    if not flop_i_open and not flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            if my_current_power > 1:    # raise
+                                if my_chips_left <= self.chips_to_call:
+                                    return [1, self.chips_to_call]
+                                bet = int(1.5*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
+                                if bet < my_chips_left:
+                                    return [2, bet]
+                                else:
+                                    return [2, my_chips_left]
+                            else:                       # call
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.6: # 60 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 0:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                    elif not flop_i_open and flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            if not turn_in_my_range and turn_in_op_range:
+                                rd = np.random.rand()
+                                if rd < 0.6: # 60 percent fold
+                                    return [0, 0]
+                                else: 
+                                    return [1, self.chips_to_call]
+                            else:
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.8: # 80 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 0:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                    elif flop_i_open and not flop_op_open:
+                        if self.turn_win_rate > my_odds:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0]
+                    else:
+                        if self.turn_win_rate > my_odds:
+                            if not turn_in_my_range and turn_in_op_range:
+                                rd = np.random.rand()
+                                if rd < 0.8: # 80 percent fold
+                                    return [0, 0]
+                                else: 
+                                    return [1, self.chips_to_call]
+                            else:
+                                return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.6: # 60 percent fold
+                                return [0, 0]
+                            else: 
+                                if my_current_power > 2:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
 
     def river_action_should_take(self):
         opponent_hand_power, opponent_range, my_range, i_open = self.preflop_analyze()
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
-        win_rate = self.get_win_rate(opponent_hands)
-        ic(win_rate)
+        if self.river_win_rate < 0:
+            self.river_win_rate = self.get_win_rate(opponent_hands)
+        ic(self.river_win_rate)
         return [1, self.chips_to_call]
 
     def action_should_take(self):
