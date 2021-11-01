@@ -22,6 +22,8 @@ class AlwaysRaise(Strategy):
         super(AlwaysRaise, self).__init__()
 
     def action_should_take(self):
+        if self.chips < self.chips_to_call:
+            return [1, self.chips]
         return [2, self.min_raise]
 
 class Human(Strategy):

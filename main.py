@@ -22,8 +22,8 @@ if __name__ == '__main__':
 
     ## Init players
     human_player = Player("wly", 0, human_strategy)
-    ai_player1 = Player("bot1", 50, rule_based_1v1)
-    ai_player2 = Player("bot2", 50, call_strategy)
+    ai_player1 = Player("bot1", 500, rule_based_1v1)
+    ai_player2 = Player("bot2", 500, raise_strategy)
     ai_player3 = Player("bot3", 0, raise_strategy)
     ai_player4 = Player("bot4", 0, call_strategy)
     ai_player5 = Player("bot5", 0, fold_strategy)

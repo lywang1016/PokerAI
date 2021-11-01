@@ -275,7 +275,7 @@ class RuleBased1V1(Strategy):
                         list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
                         best_hand, best_idx = compare.best_hand(list_cards)
                         if len(best_idx) == 2:
-                            i_win_num += 0.5
+                            i_win_num += 1
                         else:
                             if best_idx[0] == 0: # I win
                                 i_win_num += 1
@@ -293,7 +293,7 @@ class RuleBased1V1(Strategy):
                     list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
                     best_hand, best_idx = compare.best_hand(list_cards)
                     if len(best_idx) == 2:
-                        i_win_num += 0.5
+                        i_win_num += 1
                     else:
                         if best_idx[0] == 0: # I win
                             i_win_num += 1
@@ -310,56 +310,43 @@ class RuleBased1V1(Strategy):
                 list_cards = [my_evaluate.best_hand[0], op_evaluate.best_hand[0]]
                 best_hand, best_idx = compare.best_hand(list_cards)
                 if len(best_idx) == 2:
-                    i_win_num += 0.5
+                    i_win_num += 1
                 else:
                     if best_idx[0] == 0: # I win
                         i_win_num += 1
-        if case_num > 0:
+        if case_num > 0 and i_win_num > 0:
             return float(i_win_num/case_num)
         else:
-            return 0
+            return 0.01
     
-    def public_info(self, stage):
-        idx = 0
-        if stage == "flop":
-            idx = 1
-        if stage == "turn":
-            idx = 2
-        if stage == "river":   
-            idx = 3
-        my_chips_left = 0 # Info
-        op_chips_left = 0 # Info
-        current_pot = 0   # Info
-        if len(self.game_log[idx]) == 0:
-            current_pot = self.game_log[idx-1][-1].pot
-            log1 = self.game_log[idx-1][-1]
-            log2 = self.game_log[idx-1][-2]
-            if log1.name == self.my_name:
-                my_chips_left = log1.chip_left
-                op_chips_left = log2.chip_left
-            else:
-                my_chips_left = log2.chip_left
-                op_chips_left = log1.chip_left
-        else:
-            current_pot = self.game_log[idx][-1].pot
-            if len(self.game_log[idx]) == 1:
-                log1 = self.game_log[idx][0]
-                log2 = self.game_log[idx-1][-1]
-                if log1.name == self.my_name:
-                    my_chips_left = log1.chip_left
-                    op_chips_left = log2.chip_left
-                else:
-                    my_chips_left = log2.chip_left
-                    op_chips_left = log1.chip_left
-            else:
-                log1 = self.game_log[idx][-1]
-                log2 = self.game_log[idx][-2]
-                if log1.name == self.my_name:
-                    my_chips_left = log1.chip_left
-                    op_chips_left = log2.chip_left
-                else:
-                    my_chips_left = log2.chip_left
-                    op_chips_left = log1.chip_left
+    def public_info(self):
+        my_chips_left = -1 # Info
+        op_chips_left = -1 # Info
+        preflop_log = self.game_log[0]
+        flop_log = self.game_log[1]
+        turn_log = self.game_log[2]
+        river_log = self.game_log[3]
+        log_arr = []
+        for log in preflop_log:
+            log_arr.append(log)
+        if len(flop_log) > 0:
+            for log in flop_log:
+                log_arr.append(log)
+        if len(turn_log) > 0:
+            for log in turn_log:
+                log_arr.append(log)
+        if len(river_log) > 0:
+            for log in river_log:
+                log_arr.append(log)
+        current_pot = log_arr[-1].pot # Info
+        for i in range(len(log_arr)-1, -1, -1):
+            log = log_arr[i]
+            if my_chips_left < 0:
+                if log.name == self.my_name:
+                    my_chips_left = log.chip_left
+            if op_chips_left < 0:
+                if log.name != self.my_name:
+                    op_chips_left = log.chip_left
         return my_chips_left, op_chips_left, current_pot
 
     def preflop_analyze(self):
@@ -618,6 +605,9 @@ class RuleBased1V1(Strategy):
         ev = Classification()
         card5 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2]]
         my_current_power = ev.classify(card5)
+        my_chips_left, op_chips_left, current_pot = self.public_info() # Info
+        if op_chips_left < 1:
+            return [2, self.chips]
 
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -757,7 +747,9 @@ class RuleBased1V1(Strategy):
             temp_power = ev.classify(card5)
             if temp_power > my_current_power:
                 my_current_power = temp_power
-        my_chips_left, op_chips_left, current_pot = self.public_info('turn') # Info
+        my_chips_left, op_chips_left, current_pot = self.public_info() # Info
+        if op_chips_left < 1:
+            return [2, self.chips]
         flop_i_open, flop_op_open, ifist = self.postflop_analyze('flop') # open info at flop
         turn_in_my_range = False # Info
         turn_in_op_range = False # Info
@@ -844,6 +836,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         elif flop_i_open and not flop_op_open:
@@ -854,6 +848,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         else:
@@ -903,6 +899,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         elif flop_i_open and not flop_op_open:
@@ -913,6 +911,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         else:
@@ -963,6 +963,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         elif flop_i_open and not flop_op_open:
@@ -973,6 +975,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         else:
@@ -1016,9 +1020,21 @@ class RuleBased1V1(Strategy):
                                         return [0, 0] # fold
                         elif not flop_i_open and flop_op_open:
                             if self.turn_win_rate > my_odds:
-                                if self.turn_win_rate > 0.5:
+                                if self.turn_win_rate > 0.8:
                                     rd = np.random.rand()
-                                    if rd < 0.5:
+                                    if rd < 0.95:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                elif self.turn_win_rate > 0.5:
+                                    rd = np.random.rand()
+                                    if rd < 0.7:
+                                        return [1, self.chips_to_call]
+                                    else:
+                                        return [0, 0] # fold
+                                else:
+                                    rd = np.random.rand()
+                                    if rd < 0.2:
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
@@ -1032,6 +1048,8 @@ class RuleBased1V1(Strategy):
                                         return [1, self.chips_to_call]
                                     else:
                                         return [0, 0] # fold
+                                else:
+                                    return [0, 0] # fold
                             else:
                                 return [0, 0] # fold
                         else:
@@ -1217,7 +1235,9 @@ class RuleBased1V1(Strategy):
         card7 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2],self.turn,self.river]
         ev = Cards7Evaluate(card7)
         my_current_power = ev.max_power # My current best
-        my_chips_left, op_chips_left, current_pot = self.public_info('river') # Info
+        my_chips_left, op_chips_left, current_pot = self.public_info() # Info
+        if op_chips_left < 1:
+            return [2, self.chips]
         flop_i_open, flop_op_open, flop_ifist = self.postflop_analyze('flop') # open info at flop
         turn_i_open, turn_op_open, turn_ifist = self.postflop_analyze('turn') # open info at turn
         num_i_open = 0
