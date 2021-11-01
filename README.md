@@ -79,8 +79,9 @@ Now there is a simple GUI just for human player. If use human strategy, for each
 
 ## Todo list
 ### Framework
+- Plot the chips change of players over games going
 - Get a nice GUI (Maybe not able to have it quickly. But it's OK since the project targets on build AI algorithms, not a platform to serve human players. However, it is good to have one. Nothing to lose.)
 
 ### AI developent
 - Maybe can find some method in common and implement first.
-- A rule based AI as baseline.
+- For rule base 1v1 AI baseline, abstract index which indicate how 'tight' the AI play. It can be changed based on history play data during the game going. (Dynamically adjust strategy from 'tight' to 'loose')
