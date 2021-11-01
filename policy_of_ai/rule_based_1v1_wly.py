@@ -770,8 +770,8 @@ class RuleBased1V1(Strategy):
                 turn_in_op_range = True
                 break
 
-        value_bet = max(int(0.9*(op_win_rate/self.turn_win_rate)*current_pot), 0.35*current_pot)
-        bluff_bet = max(int(1.9*(op_win_rate/self.turn_win_rate)*current_pot), 0.85*current_pot)
+        value_bet = max(int(0.9*(op_win_rate/self.turn_win_rate)*current_pot), int(0.35*current_pot))
+        bluff_bet = max(int(1.9*(op_win_rate/self.turn_win_rate)*current_pot), int(0.85*current_pot))
         
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -1263,8 +1263,8 @@ class RuleBased1V1(Strategy):
             if val == self.river.value:
                 num_in_op_range += 1
 
-        value_bet = max(int(0.9*(op_win_rate/self.river_win_rate)*current_pot), 0.35*current_pot)
-        bluff_bet = max(int(1.9*(op_win_rate/self.river_win_rate)*current_pot), 0.85*current_pot)
+        value_bet = max(int(0.9*(op_win_rate/self.river_win_rate)*current_pot), int(0.35*current_pot))
+        bluff_bet = max(int(1.9*(op_win_rate/self.river_win_rate)*current_pot), int(0.85*current_pot))
 
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
