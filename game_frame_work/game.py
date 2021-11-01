@@ -1,4 +1,5 @@
 import math
+from icecream import ic
 from game_frame_work.evaluation import CompareHands
 from game_frame_work.croupier import Croupier
 
@@ -181,6 +182,7 @@ class Game(object):
 
 
     def deal_hand_cards(self):
+        ic('******************* New Game Begin! *******************')
         print("------------Deal hand cards--------------")
         player_cards, self.bfo, self.afo = self.croupier.deal_hand_cards()
 

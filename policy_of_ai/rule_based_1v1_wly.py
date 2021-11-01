@@ -1,5 +1,5 @@
 import numpy as np
-from icecream import ic
+# from icecream import ic
 from policy_of_ai.strategy import Strategy
 from game_frame_work.deckofcards import Card, Deck
 from game_frame_work.evaluation import Classification, CompareHands, Cards7Evaluate
@@ -429,9 +429,9 @@ class RuleBased1V1(Strategy):
         return i_open, op_open, ifist
 
     def preflop_action_should_take(self):
-        ic("Bot have :")
-        for card in self.hand:
-            card.show()
+        # ic("Bot have :")
+        # for card in self.hand:
+        #     card.show()
 
         self.turn_win_rate = -1
         self.river_win_rate = -1
@@ -734,7 +734,7 @@ class RuleBased1V1(Strategy):
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
         if self.turn_win_rate < 0:
             self.turn_win_rate = self.get_win_rate(opponent_hands) # My win rate
-        ic(self.turn_win_rate)
+        # ic(self.turn_win_rate)
         op_win_rate = 1 - self.turn_win_rate
         ev = Classification()
         card6 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2],self.turn]
@@ -1230,7 +1230,7 @@ class RuleBased1V1(Strategy):
         opponent_hands = self.opponent_hand_card_pool(opponent_hand_power)
         if self.river_win_rate < 0:
             self.river_win_rate = self.get_win_rate(opponent_hands)
-        ic(self.river_win_rate)
+        # ic(self.river_win_rate)
         op_win_rate = 1 - self.river_win_rate
         card7 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2],self.turn,self.river]
         ev = Cards7Evaluate(card7)

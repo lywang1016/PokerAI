@@ -21,10 +21,10 @@ if __name__ == '__main__':
     rule_based_1v1 = RuleBased1V1()
 
     ## Init players
-    human_player = Player("wly", 0, human_strategy)
+    human_player = Player("wly", 500, human_strategy)
     ai_player1 = Player("bot1", 500, rule_based_1v1)
-    ai_player2 = Player("bot2", 500, raise_strategy)
-    ai_player3 = Player("bot3", 0, raise_strategy)
+    ai_player2 = Player("bot2", 0, raise_strategy)
+    ai_player3 = Player("bot3", 0, call_strategy)
     ai_player4 = Player("bot4", 0, call_strategy)
     ai_player5 = Player("bot5", 0, fold_strategy)
     ai_player6 = Player("bot6", 0, call_strategy)
@@ -62,9 +62,9 @@ if __name__ == '__main__':
     ## Continue play game until only 1 player left
     while len(game.player_list) > 1:
         game.start_1_game()
-        # human_player.show_chips()
+        human_player.show_chips()
         ai_player1.show_chips()
-        ai_player2.show_chips()
+    #     ai_player2.show_chips()
     #     ai_player3.show_chips()
     #     ai_player4.show_chips()
     #     ai_player5.show_chips()
