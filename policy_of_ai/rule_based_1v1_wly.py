@@ -770,8 +770,8 @@ class RuleBased1V1(Strategy):
                 turn_in_op_range = True
                 break
 
-        value_bet = int(0.9*(op_win_rate/self.turn_win_rate)*current_pot)
-        bluff_bet = int(1.9*(op_win_rate/self.turn_win_rate)*current_pot)
+        value_bet = max(int(0.9*(op_win_rate/self.turn_win_rate)*current_pot), 0.35*current_pot)
+        bluff_bet = max(int(1.9*(op_win_rate/self.turn_win_rate)*current_pot), 0.85*current_pot)
         
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -1082,7 +1082,7 @@ class RuleBased1V1(Strategy):
                             if my_current_power > 1:    # raise
                                 if my_chips_left <= self.chips_to_call:
                                     return [1, self.chips_to_call]
-                                bet = int(1.3*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
+                                bet = int(1.5*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
                                 if bet < my_chips_left:
                                     return [2, bet]
                                 else:
@@ -1147,7 +1147,7 @@ class RuleBased1V1(Strategy):
                             if my_current_power > 1:    # raise
                                 if my_chips_left <= self.chips_to_call:
                                     return [1, self.chips_to_call]
-                                bet = int(1.5*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
+                                bet = int(1.6*(op_win_rate*current_pot+self.chips_to_call)/self.turn_win_rate)
                                 if bet < my_chips_left:
                                     return [2, bet]
                                 else:
@@ -1263,8 +1263,8 @@ class RuleBased1V1(Strategy):
             if val == self.river.value:
                 num_in_op_range += 1
 
-        value_bet = int(0.9*(op_win_rate/self.river_win_rate)*current_pot)
-        bluff_bet = int(1.9*(op_win_rate/self.river_win_rate)*current_pot)
+        value_bet = max(int(0.9*(op_win_rate/self.river_win_rate)*current_pot), 0.35*current_pot)
+        bluff_bet = max(int(1.9*(op_win_rate/self.river_win_rate)*current_pot), 0.85*current_pot)
 
         if self.afo[0] == self.my_name: # I take action first
             if self.chips_to_call == 0: # First action
@@ -1352,7 +1352,7 @@ class RuleBased1V1(Strategy):
                 if my_first_action == 'check':
                     if self.river_win_rate > my_odds:
                         if score > 1:    # check raise
-                            bet = int(1.0*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
+                            bet = int(1.6*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
                             if bet < my_chips_left:
                                 return [2, bet]
                             else:
@@ -1477,7 +1477,7 @@ class RuleBased1V1(Strategy):
                     if num_in_my_range > num_in_op_range: # my range
                         score += 1
                     if score > 2:    # check raise
-                        bet = int(1.0*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
+                        bet = int(1.6*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
                         if bet < my_chips_left:
                             return [2, bet]
                         else:

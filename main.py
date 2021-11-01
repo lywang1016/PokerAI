@@ -21,9 +21,9 @@ if __name__ == '__main__':
     rule_based_1v1 = RuleBased1V1()
 
     ## Init players
-    human_player = Player("wly", 200, human_strategy)
-    ai_player1 = Player("bot1", 200, rule_based_1v1)
-    ai_player2 = Player("bot2", 0, call_strategy)
+    human_player = Player("wly", 0, human_strategy)
+    ai_player1 = Player("bot1", 50, rule_based_1v1)
+    ai_player2 = Player("bot2", 50, call_strategy)
     ai_player3 = Player("bot3", 0, raise_strategy)
     ai_player4 = Player("bot4", 0, call_strategy)
     ai_player5 = Player("bot5", 0, fold_strategy)
@@ -51,20 +51,20 @@ if __name__ == '__main__':
     # ai_player4.show_chips()
 
     ## Start 100 game
-    for i in range(2):
-        game.start_1_game()
-        human_player.show_chips()
-        ai_player1.show_chips()
+    # for i in range(2):
+    #     game.start_1_game()
+    #     human_player.show_chips()
+    #     ai_player1.show_chips()
     #     ai_player2.show_chips()
     #     ai_player3.show_chips()
     #     ai_player4.show_chips()
 
     ## Continue play game until only 1 player left
-    # while len(game.player_list) > 1:
-    #     game.start_1_game()
-    #     human_player.show_chips()
-    #     ai_player1.show_chips()
-    #     ai_player2.show_chips()
+    while len(game.player_list) > 1:
+        game.start_1_game()
+        # human_player.show_chips()
+        ai_player1.show_chips()
+        ai_player2.show_chips()
     #     ai_player3.show_chips()
     #     ai_player4.show_chips()
     #     ai_player5.show_chips()
