@@ -446,6 +446,9 @@ class RuleBased1V1(Strategy):
         for card in self.hand:
             card.show()
 
+        self.turn_win_rate = -1
+        self.river_win_rate = -1
+
         power = self.my_hand_card_power()
 
         val1 = self.hand[0].value
@@ -496,7 +499,7 @@ class RuleBased1V1(Strategy):
                         return [1, self.chips_to_call]
                     else:
                         return [0, 0] # fold
-                elif call_pow > 5:
+                elif call_pow > 4:
                     rd = np.random.rand()
                     if rd < 0.2: # 20 percent call
                         return [1, self.chips_to_call]
@@ -506,7 +509,11 @@ class RuleBased1V1(Strategy):
                         else:
                             return [0, 0] # fold
                 else:
-                    return [1, self.chips_to_call] # call
+                    if val1 > 11 or val2 > 11:
+                        raise_pow = np.random.randint(low=4, high=6, size=1)
+                        return [2, raise_pow[0]*self.bb]
+                    else:
+                        return [1, self.chips_to_call]
         elif power == 2:
             if self.chips_to_call == 0:
                 rd = np.random.rand()
@@ -525,7 +532,7 @@ class RuleBased1V1(Strategy):
                         return [1, self.chips_to_call]
                     else:
                         return [0, 0] # fold
-                elif call_pow > 8:
+                elif call_pow > 6:
                     rd = np.random.rand()
                     if rd < 0.2: # 20 percent call
                         return [1, self.chips_to_call]
@@ -535,7 +542,11 @@ class RuleBased1V1(Strategy):
                         else:
                             return [0, 0] # fold
                 else:
-                    return [1, self.chips_to_call] # call
+                    if val1 > 11 or val2 > 11:
+                        raise_pow = np.random.randint(low=4, high=6, size=1)
+                        return [2, raise_pow[0]*self.bb]
+                    else:
+                        return [1, self.chips_to_call]
         elif power == 3:
             call_pow = self.chips_to_call / self.bb
             if call_pow < 4:
@@ -1202,7 +1213,305 @@ class RuleBased1V1(Strategy):
         if self.river_win_rate < 0:
             self.river_win_rate = self.get_win_rate(opponent_hands)
         ic(self.river_win_rate)
-        return [1, self.chips_to_call]
+        op_win_rate = 1 - self.river_win_rate
+        card7 = [self.hand[0],self.hand[1],self.flop[0],self.flop[1],self.flop[2],self.turn,self.river]
+        ev = Cards7Evaluate(card7)
+        my_current_power = ev.max_power # My current best
+        my_chips_left, op_chips_left, current_pot = self.public_info('river') # Info
+        flop_i_open, flop_op_open, flop_ifist = self.postflop_analyze('flop') # open info at flop
+        turn_i_open, turn_op_open, turn_ifist = self.postflop_analyze('turn') # open info at turn
+        num_i_open = 0
+        num_op_open = 0
+        if i_open:
+            num_i_open += 1
+        else:
+            num_op_open += 1
+        if flop_ifist: # I open first on flop
+            num_i_open += 1
+            if flop_op_open:
+                num_op_open += 2
+        else: # I did not open first on flop
+            if flop_op_open:
+                num_op_open += 1
+                if flop_i_open:
+                    num_i_open += 2
+        if turn_ifist: # I open first on turn
+            num_i_open += 1
+            if turn_op_open:
+                num_op_open += 2
+        else: # I did not open first on turn
+            if turn_op_open:
+                num_op_open += 1
+                if turn_i_open:
+                    num_i_open += 2
+        num_in_my_range = 0 # Info
+        num_in_op_range = 0 # Info
+        for val in my_range:
+            for i in range(3):
+                if val == self.flop[i].value:
+                    num_in_my_range += 1
+            if val == self.turn.value:
+                num_in_my_range += 1
+            if val == self.river.value:
+                num_in_my_range += 1
+        for val in opponent_range:
+            for i in range(3):
+                if val == self.flop[i].value:
+                    num_in_op_range += 1
+            if val == self.turn.value:
+                num_in_op_range += 1
+            if val == self.river.value:
+                num_in_op_range += 1
+
+        value_bet = int(0.9*(op_win_rate/self.river_win_rate)*current_pot)
+        bluff_bet = int(1.9*(op_win_rate/self.river_win_rate)*current_pot)
+
+        if self.afo[0] == self.my_name: # I take action first
+            if self.chips_to_call == 0: # First action
+                if num_i_open > num_op_open: # Jijin
+                    if self.river_win_rate > 0.5: 
+                        if my_current_power > 1: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.7:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+                elif num_i_open < num_op_open: # Baoshou
+                    if self.river_win_rate > 0.5: 
+                        if my_current_power > 2: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.8:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [2, int(0.6*value_bet)]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+                else: # Zhongyong
+                    if self.river_win_rate > 0.5: 
+                        if my_current_power > 1: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.8:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+            else: # I did some thing then op raise
+                my_odds = float(self.chips_to_call/(self.chips_to_call+current_pot))
+                my_first_action = self.game_log[3][0].action
+                score = 0
+                if self.river_win_rate > 0.5: # win rate high
+                    score += 1
+                if my_current_power > 3:    # big hand
+                    score += 3
+                elif my_current_power > 2:
+                    score += 2
+                elif my_current_power > 1:
+                    score += 1
+                else:
+                    score += 0
+                if num_in_my_range > num_in_op_range: # my range
+                    score += 1
+                if my_first_action == 'check':
+                    if self.river_win_rate > my_odds:
+                        if score > 1:    # check raise
+                            bet = int(1.0*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
+                            if bet < my_chips_left:
+                                return [2, bet]
+                            else:
+                                return [2, my_chips_left]
+                        elif score > 0:    # call
+                            return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.7:
+                                return [1, self.chips_to_call]
+                            else:
+                                return [0, 0]                            
+                    else:
+                        if score > 1:    # call
+                            return [1, self.chips_to_call]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [1, self.chips_to_call]
+                            else:
+                                return [0, 0]
+                else: # I raise then op raise more
+                    if num_in_my_range < num_in_op_range: # trust
+                        return [0, 0]
+                    else: # in my range
+                        if self.river_win_rate > my_odds:
+                            if score > 1:
+                                return [1, self.chips_to_call]
+                            else:
+                                rd = np.random.rand()
+                                if rd < 0.5:
+                                    return [1, self.chips_to_call]
+                                else:
+                                    return [0, 0]
+                        else:
+                            return [0, 0]
+        else: # op take action first
+            if self.chips_to_call == 0: # op check then my turn
+                if num_i_open > num_op_open: # Jijin
+                    if self.river_win_rate > 0.4: 
+                        if my_current_power > 1: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.7:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+                elif num_i_open < num_op_open: # Baoshou
+                    if self.river_win_rate > 0.5: 
+                        if my_current_power > 1: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.8:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+                else: # Zhongyong
+                    if self.river_win_rate > 0.5: 
+                        if my_current_power > 1: # value bet more
+                            rd = np.random.rand()
+                            if rd < 0.7:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            rd = np.random.rand()
+                            if rd < 0.3:
+                                return [2, value_bet]
+                            else:
+                                return [2, bluff_bet]
+                    else:
+                        if num_in_my_range > num_in_op_range:
+                            rd = np.random.rand()
+                            if rd < 0.2:
+                                return [1, 0] # check
+                            else:
+                                return [2, bluff_bet]
+                        else:
+                            return [1, 0] # check
+            else: # op raise
+                my_odds = float(self.chips_to_call/(self.chips_to_call+current_pot))
+                if self.river_win_rate > my_odds:
+                    score = 0
+                    if self.river_win_rate > 0.5: # win rate high
+                        score += 1
+                    if my_current_power > 3:    # big hand
+                        score += 3
+                    elif my_current_power > 2:
+                        score += 2
+                    elif my_current_power > 1:
+                        score += 1
+                    else:
+                        score += 0
+                    if num_in_my_range > num_in_op_range: # my range
+                        score += 1
+                    if score > 2:    # check raise
+                        bet = int(1.0*(op_win_rate*current_pot+self.chips_to_call)/self.river_win_rate)
+                        if bet < my_chips_left:
+                            return [2, bet]
+                        else:
+                            return [2, my_chips_left]
+                    elif score > 1:    # call
+                        return [1, self.chips_to_call]
+                    else:
+                        rd = np.random.rand()
+                        if rd < 0.8:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0]                            
+                else:
+                    score = 0
+                    if self.river_win_rate > 0.5: # win rate high
+                        score += 1
+                    if my_current_power > 3:    # big hand
+                        score += 3
+                    elif my_current_power > 2:
+                        score += 2
+                    elif my_current_power > 1:
+                        score += 1
+                    else:
+                        score += 0
+                    if num_in_my_range > num_in_op_range: # my range
+                        score += 1
+                    if score > 2:    # call
+                        return [1, self.chips_to_call]
+                    else:
+                        rd = np.random.rand()
+                        if rd < 0.3:
+                            return [1, self.chips_to_call]
+                        else:
+                            return [0, 0]
 
     def action_should_take(self):
         if len(self.flop) == 0: # Preflop
