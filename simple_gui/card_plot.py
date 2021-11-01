@@ -17,6 +17,8 @@ class SimpleGUI(object):
         for i in range(2):
             suit = hand[i].suit
             value = hand[i].value
+            if value == 14:
+                value = 1
             card_path = self.cards_img_path + suit + '/' + str(value) + '.png'
             img = mpimg.imread(card_path)
             plt.subplot(2, 5, i+1)
@@ -28,6 +30,8 @@ class SimpleGUI(object):
         for i in range(3):
             suit = flop[i].suit
             value = flop[i].value
+            if value == 14:
+                value = 1
             card_path = self.cards_img_path + suit + '/' + str(value) + '.png'
             img = mpimg.imread(card_path)
             plt.subplot(2, 5, i+6)
@@ -38,6 +42,8 @@ class SimpleGUI(object):
     def display_turn(self, turn):
         suit = turn.suit
         value = turn.value
+        if value == 14:
+            value = 1
         card_path = self.cards_img_path + suit + '/' + str(value) + '.png'
         img = mpimg.imread(card_path)
         plt.subplot(2, 5, 9)
@@ -48,6 +54,8 @@ class SimpleGUI(object):
     def display_river(self, river):
         suit = river.suit
         value = river.value
+        if value == 14:
+            value = 1
         card_path = self.cards_img_path + suit + '/' + str(value) + '.png'
         img = mpimg.imread(card_path)
         plt.subplot(2, 5, 10)
