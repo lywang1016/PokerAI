@@ -120,9 +120,17 @@ class Human(Strategy):
 
         if self.chips_to_call == 0:
             action = int(input("Pick actions: 0 for fold, 1 for check, 2 for raise: "))
+            if action < 1:
+                action = 0
+            if action > 1:
+                action = 2
         else:
             print(str(self.chips_to_call) + " chips to call." )
             action = int(input("Pick actions: 0 for fold, 1 for call, 2 for raise: "))
+            if action < 1:
+                action = 0
+            if action > 1:
+                action = 2
         if action == 0:
             return [0, 0]
         if action == 1:
