@@ -625,8 +625,8 @@ class RuleBased1V1(Strategy):
                         return [2, int(0.35*current_pot)]
                     else: # 50 percent c-bet
                         rd = np.random.rand()
-                        if rd > 0.5:
-                            return [2, int(0.3*current_pot)]
+                        if rd < 0.5:
+                            return [2, int(0.35*current_pot)]
                         else:
                             return [1, self.chips_to_call]
                 else: # I didn't open, just check
@@ -678,10 +678,10 @@ class RuleBased1V1(Strategy):
                     current_pot = self.game_log[1][-1].pot
                     if num_my_range >= num_opponent_range: # c-bet, estimate a bet value
                         return [2, int(0.35*current_pot)]
-                    else: # 50 percent c-bet
+                    else: # 60 percent c-bet
                         rd = np.random.rand()
-                        if rd > 0.5:
-                            return [2, int(0.3*current_pot)]
+                        if rd < 0.6:
+                            return [2, int(0.35*current_pot)]
                         else:
                             return [1, self.chips_to_call]
                 else: # I didn't open, if got some thing good, 50 percent donk
@@ -689,7 +689,7 @@ class RuleBased1V1(Strategy):
                         rd = np.random.rand()
                         if rd > 0.5:
                             current_pot = self.game_log[1][-1].pot
-                            return [2, int(0.3*current_pot)]
+                            return [2, int(0.35*current_pot)]
                         else:
                             return [1, self.chips_to_call]
                     else: # check
