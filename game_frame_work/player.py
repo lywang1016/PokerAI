@@ -130,6 +130,9 @@ class Player(object):
     def show_best_hand(self):
         if len(self.__all_cards) == 7:
             evaluate = Cards7Evaluate(self.__all_cards)
+            print(self.name + "'s hand cards are:")
+            for card in self.__hand:
+                card.show()
             print(self.name + "'s card power is: " + evaluate.max_power_str)
             print(self.name + "'s best hand is:")
             for card in evaluate.best_hand[0]:
