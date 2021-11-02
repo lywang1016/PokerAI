@@ -67,10 +67,10 @@ if __name__ == '__main__':
         ic('******************** Game Finish! *********************')
         human_chip = human_player.show_chips()
         bot_chip = ai_player1.show_chips()
-        if human_chip < 3:
+        if human_chip < sb+bb:
             ic('Human have no chips, game over!')
             break
-        if bot_chip < 3:
+        if bot_chip < sb+bb:
             ic('Robot have no chips, game over!')
             break
         go_on = int(input("Continue game?: 0 for end game, 1 for continue: "))
