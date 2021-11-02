@@ -61,15 +61,15 @@ if __name__ == '__main__':
     #     ai_player4.show_chips()
 
     ## Continue play game until only 1 player left
-    while len(game.player_list) > 1:
+    while len(game.player_list) > 1:  
+        go_on = int(input("Continue game?: 0 for end game, 1 for continue: "))
+        if go_on == 0:
+            break
         ic('******************* New Game Begin! *******************')
         game.start_1_game()
         ic('******************** Game Finish! *********************')
         human_player.show_chips()
         ai_player1.show_chips()
-        go_on = int(input("Continue game?: 0 for end game, 1 for continue: "))
-        if go_on == 0:
-            break
     #     ai_player2.show_chips()
     #     ai_player3.show_chips()
     #     ai_player4.show_chips()
