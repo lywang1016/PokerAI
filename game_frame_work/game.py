@@ -128,6 +128,8 @@ class Game(object):
                                 winner = self.search_player(name)
                                 if name in self.all_in_max_pot:
                                     pot_win = self.all_in_max_pot[name] 
+                                    if pot_win > self.pot:
+                                        pot_win = self.pot
                                     winner.win_pot(pot_win)
                                     self.pot -= pot_win
                                     for others in self.all_in_max_pot:
