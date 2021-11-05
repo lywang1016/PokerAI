@@ -374,7 +374,7 @@ class RuleBased1V1(Strategy):
             log3 = log_before_flop[2] 
             log4 = log_before_flop[3] # My action
             if log3.action == 'call':
-                if log4.action == 'raise':
+                if log4.action == 'raise' and len(log_before_flop) > 4:
                     log5 = log_before_flop[4]
                     if log5.action == 'call':
                         return [1,2,3], [6,7,8,9,10,11,12], \
@@ -386,7 +386,7 @@ class RuleBased1V1(Strategy):
                     return [0,1,2], [2,3,4,5,6,7,8,9], \
                            [2,3,4,5,6,7,8,9], False
             if log3.action == 'raise':
-                if log4.action == 'raise':
+                if log4.action == 'raise' and len(log_before_flop) > 4:
                     log5 = log_before_flop[4]
                     if log5.action == 'call':
                         return [3,4,5], [8,9,10,11,12,13,1], \
